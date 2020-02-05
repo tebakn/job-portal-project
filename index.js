@@ -1,4 +1,3 @@
-const Client =require("pg").Client
 var express = require('express');
 const bodyParser = require('body-parser');
 const sup=require('./supplement');

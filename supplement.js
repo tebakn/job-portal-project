@@ -10,6 +10,7 @@ function dbcon(){
     }))
 }
 async function getjobs(req,res){
+    try{
     if (req.path.split('/')[1]=="candidate"){
         client=dbcon()
         client.connect()
@@ -35,8 +36,12 @@ async function getjobs(req,res){
             res.end(JSON.stringify(result.rows))
         })
     }
-}
+    }
+    catch(e){}
+    finally{}
+}   
 async function insertjobs(req,res){
+    try{
     job=req.body
     client=dbcon()
     await client.connect()
@@ -48,6 +53,10 @@ async function insertjobs(req,res){
         return client.query(q);
     })
     res.redirect(`/recruiter/${req.params.id}/jobs`);
+    }
+    catch(e){
+        
+    }
 }
 async function getapplications(req,res){
     if (req.path.split('/')[1]=="candidate"){
@@ -122,7 +131,9 @@ async function login(inp,user){
         }
                     //console.log(ret,result.rows[0].user_id)  
     })
-    .catch((e)=>console.log(e))
+    }
+    catch(e){
+
     }
     finally{
     client.end()
