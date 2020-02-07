@@ -19,15 +19,38 @@ function logindet(){
 }
 function filterdata(filter){
     console.log(filter)
-    if (filter===undefined)
+    if (Object.keys(filter).length===0)
         return gotdata.data;
-    console.log(Object.keys(filter))
-    return gotdata.data.filter((values)=>{
+
+        return gotdata.data.filter((values)=>{
         
-        let ret= Object.keys(filter).reduce((tot,filtkey)=>(tot && values[filtkey]===filter[filtkey]),true)
+        let ret= Object.keys(filter).reduce((tot,filtkey)=>{
+            if (values[filtkey.toLowerCase()]===undefined)
+                {throw {name:"key error",message:`key ${filtkey} not present`};
+                return false}
+            return (tot && values[filtkey.toLowerCase()]===filter[filtkey])},true)
         return ret; 
     })
 }
+// function comparator(dbrowobj,filterobj,filterkey){
+//     keyarr=filterkey.split('_')
+//     if (keyarr.length===1){
+//         if (dbrowobj[filterkey.toLowerCase()]!==undefined)
+//             return dbrowobj[filterkey.toLowerCase()]===filterobj[filterkey]
+//         else
+//             throw  `Key ${filterkey} is not present`
+//     }
+//     last=keyarr.pop()
+//     let compute;
+//     if (last.toLowerCase()==="isgreater")
+//         compute=(a,b)=>{a >= b}
+//     else if(last.toLowerCase()==="isless")
+//         compute=(a,b)=>{a<=b}
+//     else if(last.toLowerCase()==="and")
+//         compute=(a,b)
+
+
+// }
 async function getcandidates(req,res){
     if(!validuser(req.params.id,"recruiter")){
         if (loginuser===undefined)
@@ -36,12 +59,14 @@ async function getcandidates(req,res){
             res.redirect(`/recruiter/${loginuser.id}`)
         return
     }
+    try{
     if(gotdata!==undefined && gotdata.api==="candidate"){
-        res.end(JSON.stringify(filterdata(req.body.filter)))
+        res.status(200).end(JSON.stringify(filterdata(req.query)))
         return
     }
     client=dbcon()
-        client.connect()
+
+        await client.connect()
         .then(()=>console.log("WOHOO"))
         .then(()=>{
             let q=`select first_name,last_name,gender,email,phone_number,skills,education \
@@ -50,28 +75,41 @@ async function getcandidates(req,res){
         })
         .then((result)=>{
             gotdata={api:"candidate",data:result.rows}
-            res.end(JSON.stringify(filterdata(req.body.filter)))
+            res.status(200).end(JSON.stringify(filterdata(req.query)))
         })
-    }
-
+        .catch((e)=>{
+            throw e;
+        })
+        .finally(()=>{client.end()})
+   }
+   catch(e){
+    if (e.name==="key error")
+    res.status(400).end(e.message)
+    else
+    throw e;
+   }
+}
 async function getjobs(req,res){
     if(!validuser(req.params.id,req.path.split('/')[1])){
-        if (loginuser===undefined)
-        res.redirect('/')
+        if (loginuser===undefined){
+            res.status(403).end("Invalid user id")
+            //res.status(403).redirect('/')
+        }
         else{
             let user= (loginuser.skills)?"candidate":"recruiter";
-            res.redirect(`/${user}/${loginuser.id}`)
+            res.status(403).end("Invalid user id")
+            //res.status(403).redirect(`/${user}/${loginuser.id}`)
         }
         return
     }
+    try{
     if(gotdata!==undefined && gotdata.api==="jobs"){ 
-            res.end(JSON.stringify(filterdata(req.body.filter)))
+            res.end(JSON.stringify(filterdata(req.query)))
             return
         }
-    try{
     if (req.path.split('/')[1]=="candidate"){
         client=dbcon()
-        client.connect()
+        await client.connect()
         .then(()=>console.log("WOHOO"))
         .then(()=>{
             let q=`select * from jobs where isopen='true';`;
@@ -79,13 +117,15 @@ async function getjobs(req,res){
         })
         .then((result)=>{
             gotdata={api:"jobs",data:result.rows}
-            res.end(JSON.stringify(filterdata(req.body.filter)))
+            res.status(200).end(JSON.stringify(filterdata(req.query)))
         })
+        .catch((e)=>{throw e;})
+        .finally(()=>client.end())
 
     }
     else{
         client=dbcon()
-        client.connect()
+        await client.connect()
         .then(()=>console.log("WOHOO"))
         .then(()=>{
             let q=`select * from jobs where owner_id=${req.params.id};`;
@@ -93,13 +133,19 @@ async function getjobs(req,res){
         })
         .then((result)=>{
             gotdata={api:"jobs",data:result.rows}
-            res.end(JSON.stringify(filterdata(req.body.filter)))
+            res.status(200).end(JSON.stringify(filterdata(req.query)))
         })
+        .catch((e)=>{throw e;})
+        .finally(()=>client.end())
     }
     }
     catch(e){
-        console.log(e.name,e.message)
-    }   
+        if (e.name==="key error")
+        res.status(400).end(e.message)
+        else
+        throw e;
+       }
+
 }
 async function insertjobs(req,res){
     if(!validuser(req.params.id,req.path.split('/')[1])){
@@ -107,7 +153,7 @@ async function insertjobs(req,res){
         res.redirect('/')
         else{
             let user= (loginuser.skills)?"candidate":"recruiter";
-            res.redirect(`/${user}/${loginuser.id}`)
+            res.status(400).redirect(`/candidate/${loginuser.id}`)
         }
         return
     }
@@ -119,10 +165,19 @@ async function insertjobs(req,res){
         let q=`Insert into jobs \
              values('${job.job_id}','${job.name}','${job.salary}','${job.deparment}','${job.availability}'\
              ,'${job.joining_date}','${job.skills}','${job.isopen}','${req.params.id}');`
-        return client.query(q);
+                ret=client.query(q);
+                return ret  
     })
-    res.redirect(`/recruiter/${req.params.id}/jobs`);
-
+    .then(()=>{console.log("afterquerry")
+    res.status(201).redirect(`/recruiter/${req.params.id}/jobs`);})
+    .catch((e)=>{
+        console.log("INSIDE CATCH")
+        if (e.message.match('constraint "jobs_pkey"')!==-1)
+            res.status(400).end("Job id exists")
+        else
+            throw e;
+    })
+    .finally(()=>{client.end()})
 }
 
 async function updatestatus(req,res){
@@ -134,15 +189,19 @@ async function updatestatus(req,res){
         return
     }
     client=dbcon()
-        client.connect()
+        await client.connect()
         .then(()=>console.log("WOHOO"))
         .then(()=>{
             let q=`update application set status=${req.boody.status} where job_id=${req.params.jid} and candidate_id=${req.params.cid};`;
             return client.query(q);
         })
         .then((result)=>{
-            res.redirect(`/recruiter/${req.params.id}/applications`)
+            res.status(200).redirect(`/recruiter/${req.params.id}/applications`)
         })
+        .catch((e)=>{
+            throw e;
+        })
+        .finally(()=>{client.end()})
 }
 
 async function getapplications(req,res){
@@ -155,14 +214,15 @@ async function getapplications(req,res){
         }
         return
     }
+    try{
     if(gotdata!==undefined && gotdata.api==="application"){
-        res.end(JSON.stringify(filterdata(req.body.filter)))
+        res.end(JSON.stringify(filterdata(req.query)))
         return
     }
     console.log(req.path.split('/'))
     if (req.path.split('/')[1]=="candidate"){
         client=dbcon()
-        client.connect()
+        await client.connect()
         .then(()=>console.log("WOHOO"))
         .then(()=>{
             let q=`select * from applications where candidate_id=${req.params.id};`;
@@ -170,8 +230,10 @@ async function getapplications(req,res){
         })
         .then((result)=>{
             gotdata={api:"application",data:result.rows}
-            res.end(JSON.stringify(filterdata(req.body.filter)))
+            res.end(JSON.stringify(filterdata(req.query)))
         })
+        .catch((e)=>{throw e;})
+        .finally(()=>{client.end()})
 
     }
     else{
@@ -185,10 +247,19 @@ async function getapplications(req,res){
         })
         .then((result)=>{
             gotdata={api:"application",data:result.rows}
-            res.end(JSON.stringify(filterdata(req.body.filter)))
+            res.end(JSON.stringify(filterdata(req.query)))
         })
+        .catch((e)=>{throw e;})
+        .finally(()=>{client.end()})
     }
-}
+    }
+    catch{
+        if (e.name==="key error")
+        res.status(400).end(e.message)
+        else
+        throw e;
+       }
+    }
 async function apply(req,res){
     if(!validuser(req.params.id,"candidate")){
         if (loginuser===undefined)
@@ -198,25 +269,27 @@ async function apply(req,res){
         return
     }
     client=dbcon()
-    client.connect()
+    await client.connect()
     .then(()=>console.log("WOHOO"))
     .then(()=>{
-        let q=`Insert into spplications (job_id,candidate_id) values (${req.params.jid},${req.params.id});`;
+        let q=`Insert into applications (job_id,candidate_id) values (${req.params.jid},${req.params.id});`;
         return client.query(q);
     })
     .then((result)=>{
         res.redirect(`/candidate/${req.params.id}/applications`)
-    }).catch((e)=>{
+    })
+    .catch((e)=>{
         if (e.message.match('constraint "applications_job_id_fkey"')!==-1)
-            res.status(400).end("incorrect job id")//wrong job id
+            res.status(400).end("incorrect job id")
         else
             throw e;
         
     })
+    .finally(()=>{client.end();})
 }
 async function login(req,res){
     if (loginuser!==undefined)
-        res.status(404).end("LOGINUSER EXISTS")
+        res.status(401).end("LOGINUSER EXISTS")
     inp={id: req.body.username, pass: req.body.password}
     user=req.path.split('/')[1]
     let ret;
@@ -257,7 +330,7 @@ async function login(req,res){
 function validuser(id,user){
     id=Number(id)
     if (String(id)==='NaN')
-        return null
+        return false
     console.log(loginuser)
     console.log(user)
     if (loginuser===undefined)
@@ -275,6 +348,7 @@ async function tooglelogin(req,res){
         loginuser={id:10001,name:"NAMANAMAN"}
     else
         loginuser=undefined
+    res.status(200).end("ADMIN")
 }
 
 
