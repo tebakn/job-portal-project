@@ -1,6 +1,6 @@
 var express = require('express');
 const bodyParser = require('body-parser');
-const sup=require('./supplement');
+const api=require('./apifunction');
 let app = express();
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
@@ -9,43 +9,43 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.get("/",(req,res)=>{
     res.status(200).end("Welcome Login to continue")
 })
-app.get("/toogleadm",sup.tooglelogin)
+app.get("/toogleadm",api.tooglelogin)
 
-app.post("/candidate",sup.login)
-app.post("/recruiter",sup.login)
-
-
+app.post("/candidate",api.login)
+app.post("/recruiter",api.login)
 
 
-app.get("/candidate/:id",sup.logindet)
-app.get("/recruiter/:id",sup.logindet)
 
 
-app.get("/candidate/:id/jobs",sup.getjobs)
-app.get("/recruiter/:id/jobs",sup.getjobs)
+app.get("/candidate/:id",api.logindet)
+app.get("/recruiter/:id",api.logindet)
 
 
-//app.post("/candidate/:id/jobs",sup.getjobs)
+app.get("/candidate/:id/jobs",api.getjobs)
+app.get("/recruiter/:id/jobs",api.getjobs)
 
 
-app.get("/candidate/:id/applications",sup.getapplications)
-app.get("/recruiter/:id/applications/",sup.getapplications)
+//app.post("/candidate/:id/jobs",api.getjobs)
 
 
-app.post("/candidate/:id/jobs/:jid",sup.apply)
+app.get("/candidate/:id/applications",api.getapplications)
+app.get("/recruiter/:id/applications/",api.getapplications)
 
 
-app.get("/recruiter/:id/candidates/",sup.getcandidates)
+app.post("/candidate/:id/jobs/:jid",api.apply)
 
 
-app.patch("/recruiter/:id/applications/:jid/:cid",sup.updatestatus)
+app.get("/recruiter/:id/candidates/",api.getcandidates)
+
+
+app.patch("/recruiter/:id/applications/:jid/:cid",api.updatestatus)
 
 
 // app.get("/new:name",(req,res)=>{
 //     res.end(req.params.name)
 // })
 
-app.post("/recruiter/:id/jobs",sup.insertjobs)
+app.post("/recruiter/:id/jobs",api.insertjobs)
 
 var server = app.listen(8081, function () {
     var host = server.address().address

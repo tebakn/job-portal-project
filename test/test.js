@@ -210,7 +210,7 @@ describe('login recruiter', () => {
         
     });
     describe('post job', () => {
-        it('return job id inserted', (done) => {
+        it('return error with validation', (done) => {
           chai.request(server)
               .post('/recruiter/104/jobs/')
               .type('JSON')
@@ -224,9 +224,9 @@ describe('login recruiter', () => {
                 'isopen': 'true'
               })
               .end((err, res) => {
-                    res.should.have.status(404);
+                    res.should.have.status(400);
                           console.log(res.text)
-                    res.text.should.be.equal('Job inserted with ID 5555');
+                    res.text.should.be.a('string');
                     
                 done();
               });
@@ -254,7 +254,7 @@ describe('login recruiter', () => {
           });
         it('error as the job is already inserted with status 400', (done) => {
             chai.request(server)
-                .post('/candidate/2/jobs/')
+                .post('/recruiter/104/jobs/')
                 .type('JSON')
                 .send({
                   'job_id': '5555',
@@ -268,7 +268,7 @@ describe('login recruiter', () => {
                 .end((err, res) => {
                       res.should.have.status(400);
                             console.log(res.text)
-                      res.text.should.be.equal('Job inserted with ID 5555');
+                      res.text.should.be.equal("Job id exists");
                       
                   done();
                 });

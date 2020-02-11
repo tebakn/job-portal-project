@@ -11,7 +11,7 @@ function validateCandidate(customer){
     return joi.validate(customer,schema);
 }
 function validateRecruiter(recruiter){
-    const schema1 ={
+    const schema ={
         username: joi.string().min(3).max(30).required(),
         password: joi.string().regex(/^[a-zA-Z0-9]{3,30}$/),
         email: joi.string().email({ minDomainAtoms: 2 }),
@@ -19,13 +19,22 @@ function validateRecruiter(recruiter){
     };
     return joi.validate(recruiter,schema);
 }
-function validatelogin(company){
-    const schema2 ={
-        company_id: joi.number().integer(),
-        company_name: Joi.string().min(3).max(30).required(),
-        description: joi.string()
+function validateGotData(dataobj){
+    const schema ={
+        api: joi.string().required(),
+        data: joi.array().required()
     };
-    return joi.validate(company,schema);
+    return joi.validate(dataobj,schema);
+
+}
+function validatelogin(loginobj){
+    const schema ={
+        id: joi.number().integer(),
+        name: joi.string().required(),
+        company: joi.string(),
+        skill: joi.string()
+    };
+    return joi.validate(loginobj,schema);
 } 
 function validatejob(jobs){
     const schema ={
@@ -41,4 +50,6 @@ function validatejob(jobs){
     return joi.validate(jobs,schema);
 }
 module.exports={
+    validateGotData,
+    validatelogin,
     validateJob:validatejob}

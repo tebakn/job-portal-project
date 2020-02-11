@@ -1,9 +1,38 @@
-const validate=require("./validate")
 const Client =require("pg").Client
+const validate=require("./validate")
+
 
 let gotdata;
 let loginuser;
 
+function getLogininfo(){
+    return loginuser
+}
+function getDatainfo(){
+    return gotdata
+}
+async function setLogininfo(obj){
+    let failflag=false;
+    out=await validate.validatelogin(obj)
+    .catch((e)=>{
+        res.status(500).end(e.message)
+        failflag=true;
+        })
+    if (failflag)
+        return
+    loginuser=obj
+}
+async function setDatainfo(obj){
+    let failflag=false;
+    out=await validate.validateGotData(obj)
+    .catch((e)=>{
+        res.status(500).end(e.message)
+        failflag=true;
+        })
+    if (failflag)
+        return
+    return gotdata=obj
+}
 function dbcon(){
     return (new Client({
         user: "postgres",
@@ -28,16 +57,6 @@ function validuser(id,user){
     else if (user==="recruiter" && loginuser.company===undefined && loginuser.id!==10001)
         return false
     return true
-}
-function logindet(req,res){
-    if(!validuser(req.params.id,req.path.split('/')[1])){
-        if (loginuser===undefined)
-            res.status(401).end("Login First")
-        else
-            res.status(401).end(`Invalid ID token`)
-        return
-    }
-    res.status(200).end("Welcome user "+ JSON.stringify({id:loginuser.id,name:loginuser.name}))
 }
 function filterdata(filter){
     console.log(filter)
@@ -115,299 +134,13 @@ function paginated(result,page,limit){
     return ret_obj
 }
 
-async function getcandidates(req,res){
-    if(!validuser(req.params.id,"recruiter")){
-        if (loginuser===undefined)
-            res.status(401).end("Login First")
-        else
-            res.status(401).end(`Invalid ID token`)
-        return
-    }
-    try{
-    if(gotdata!==undefined && gotdata.api==="candidate"){
-        res.status(200).end(JSON.stringify(filterdata(req.query).results))
-        return
-    }
-    client=dbcon()
-
-        await client.connect()
-        .then(()=>console.log("WOHOO"))
-        .then(()=>{
-            let q=`select first_name,last_name,gender,email,phone_number,skills,education \
-            from candidate INNER JOIN personal_details ON candidate.candidate_id=personal_details.user_id ;`;
-            return client.query(q);
-        })
-        .then((result)=>{
-            gotdata={api:"candidate",data:result.rows}
-            res.status(200).end(JSON.stringify(filterdata(req.query).results))
-        })
-        .catch((e)=>{
-            throw e;
-        })
-        .finally(()=>{client.end()})
-   }
-   catch(e){
-    if (e.name==="key error")
-    res.status(400).end(e.message)
-    else
-    throw e;
-   }
-}
-async function getjobs(req,res){
-    if(!validuser(req.params.id,req.path.split('/')[1])){
-        if (loginuser===undefined)
-            res.status(401).end("Login First")
-        else
-            res.status(401).end(`Invalid ID token`)
-        return
-    }
-    try{
-    if(gotdata!==undefined && gotdata.api==="jobs"){ 
-            res.end(JSON.stringify(filterdata(req.query).results))
-            return
-        }
-    if (req.path.split('/')[1]=="candidate"){
-        client=dbcon()
-        await client.connect()
-        .then(()=>console.log("WOHOO"))
-        .then(()=>{
-            let q=`select * from jobs where isopen='true';`;
-            return client.query(q);
-        })
-        .then((result)=>{
-            gotdata={api:"jobs",data:result.rows}
-            res.status(200).end(JSON.stringify(filterdata(req.query).results))
-        })
-        .catch((e)=>{throw e;})
-        .finally(()=>client.end())
-
-    }
-    else{
-        client=dbcon()
-        await client.connect()
-        .then(()=>console.log("WOHOO"))
-        .then(()=>{
-            let q=`select * from jobs where owner_id=${req.params.id};`;
-            return client.query(q);
-        })
-        .then((result)=>{
-            gotdata={api:"jobs",data:result.rows}
-            res.status(200).end(JSON.stringify(filterdata(req.query).results))
-        })
-        .catch((e)=>{throw e;})
-        .finally(()=>client.end())
-    }
-    }
-    catch(e){
-        if (e.name==="key error")
-        res.status(400).end(e.message)
-        else
-        throw e;
-       }
-
-}
-async function insertjobs(req,res){
-    if(!validuser(req.params.id,req.path.split('/')[1])){
-        if (loginuser===undefined)
-        res.status(401).end("Login First")
-        else
-            res.status(401).end(`Invalid ID token`)
-        return
-    }
-    job=req.body
-    await validate.validateJob(job)
-    .catch((e)=>{
-        console.log(e);
-        res.status(400).end(e.message)})
-    console.log(job)
-    client=dbcon()
-    await client.connect()
-    .then(()=>console.log("WOHOO"))
-    .then(()=>{
-        let q=`Insert into jobs \
-             values('${job.job_id}','${job.name}','${job.salary}','${job.deparment}','${job.availability}'\
-             ,'${job.joining_date}','${job.skills}','${job.isopen}','${req.params.id}');`
-                ret=client.query(q);
-                return ret  
-    })
-    .then(()=>{console.log("afterquerry")
-    res.status(201).end(`Job inserted with ID ${job.job_id}`)})
-    .catch((e)=>{
-        console.log("INSIDE CATCH")
-        if (e.message.match('constraint "jobs_pkey"')!==-1)
-            res.status(400).end("Job id exists")
-        else
-            throw e;
-    })
-    .finally(()=>{client.end()})
-}
-
-async function updatestatus(req,res){
-    if(!validuser(req.params.id,"recruiter")){
-        if (loginuser===undefined)
-            res.status(401).end("Login First")
-        else
-            res.status(401).end(`Invalid ID token`)
-        return
-    }
-    client=dbcon()
-        await client.connect()
-        .then(()=>console.log("WOHOO"))
-        .then(()=>{
-            let q=`update application set status=${req.boody.status} where job_id=${req.params.jid} and candidate_id=${req.params.cid};`;
-            return client.query(q);
-        })
-        .then((result)=>{
-            res.status(200).end(`Updated status of ${req.params.cid}`)
-        })
-        .catch((e)=>{
-            throw e;
-        })
-        .finally(()=>{client.end()})
-}
-
-async function getapplications(req,res){
-    if(!validuser(req.params.id,req.path.split('/')[1])){
-        if (loginuser===undefined)
-            res.status(401).end("Login First")
-        else
-            res.status(401).end(`Invalid ID token`)
-        return
-    }
-    try{
-    if(gotdata!==undefined && gotdata.api==="application"){
-        res.end(JSON.stringify(filterdata(req.query).results))
-        return
-    }
-    console.log(req.path.split('/'))
-    if (req.path.split('/')[1]=="candidate"){
-        client=dbcon()
-        await client.connect()
-        .then(()=>console.log("WOHOO"))
-        .then(()=>{
-            let q=`select * from applications where candidate_id=${req.params.id};`;
-            return client.query(q);
-        })
-        .then((result)=>{
-            gotdata={api:"application",data:result.rows}
-            res.end(JSON.stringify(filterdata(req.query).results))
-        })
-        .catch((e)=>{throw e;})
-        .finally(()=>{client.end()})
-
-    }
-    else{
-        client=dbcon()
-        client.connect()
-        .then(()=>console.log("WOHOO"))
-        .then(()=>{
-            let q=`select candidate_id,applications.job_id,status from applications,jobs\
-             where applications.job_id=jobs.job_id and jobs.owner_id=${req.params.id};`;
-            return client.query(q);
-        })
-        .then((result)=>{
-            gotdata={api:"application",data:result.rows}
-            res.end(JSON.stringify(filterdata(req.query).results))
-        })
-        .catch((e)=>{throw e;})
-        .finally(()=>{client.end()})
-    }
-    }
-    catch(e){
-        if (e.name==="key error")
-        res.status(400).end(e.message)
-        else
-        throw e;
-       }
-    }
-async function apply(req,res){
-    if(!validuser(req.params.id,"candidate")){
-        if (loginuser===undefined)
-            res.status(401).end("Login First")
-        else
-            res.status(401).end(`Invalid ID token`)
-        return
-    }
-    client=dbcon()
-    await client.connect()
-    .then(()=>console.log("WOHOO"))
-    .then(()=>{
-        let q=`Insert into applications (job_id,candidate_id) values (${req.params.jid},${req.params.id});`;
-        return client.query(q);
-    })
-    .then((result)=>{
-        res.status(201).end(`created new application for (${req.params.jid},${req.params.id})`)
-    })
-    .catch((e)=>{
-        console.log(e.message.match('constraint "applications_job_id_fkey"'))
-        if (e.message.match('constraint "applications_job_id_fkey"')!==null)
-            res.status(400).end("incorrect job id")
-        else if(e.message.match('constraint "applications_pkey"')!==null)
-            res.status(400).end("application exists")
-        else
-            throw e;
-        
-    })
-    .finally(()=>{client.end();})
-}
-async function login(req,res){
-    if (loginuser!==undefined)
-        res.status(401).end("LOGINUSER EXISTS")
-    inp={id: req.body.username, pass: req.body.password}
-    user=req.path.split('/')[1]
-    let ret;
-
-    client=dbcon()
-
-    await client.connect()
-    .then(()=>{console.log("WOHOO")})
-    .then(()=>{
-        let q;
-        if (user==="candidate")
-        { q=`Select user_id,first_name,skills,password from personal_details,candidate where username='${inp.id}'\
-        and candidate_id=user_id ;`}
-        else
-         q=`Select user_id,first_name,company,password from personal_details,recruiter where username='${inp.id}'\
-        and recruiter_id=user_id ;`
-        return client.query(q)})
-    .then(result=>{
-        let candidate_details=result.rows[0]
-        if (candidate_details===undefined)
-            res.status(400).end("User not found");
-        
-        else if ((candidate_details.password) !== inp.pass){
-            res.status(400).end("Password not found");
-        }
-        else{
-            if(user==="candidate")
-                loginuser= {id:candidate_details.user_id,skill:candidate_details.skills,name:candidate_details.first_name}
-            else
-                loginuser= {id:candidate_details.user_id,company:candidate_details.company,name:candidate_details.first_name}
-            res.status(200).end(`User ${loginuser.id}`)
-        }
-                    //console.log(ret,result.rows[0].user_id)  
-    })
-
-
-}
-async function tooglelogin(req,res){
-    if (loginuser===undefined)
-        loginuser={id:10001,name:"NAMANAMAN"}
-    else
-        loginuser=undefined
-    res.status(200).end("ADMIN")
-}
-
-
 
 module.exports={
-    apply,
-    logindet,
-    login,
-    getapplications,
-    getjobs,
-    getcandidates,
-    insertjobs,
-    updatestatus,
-    tooglelogin
+    getDatainfo,
+    setDatainfo,
+    getLogininfo,
+    setLogininfo,
+    filterdata,
+    dbcon,
+    validuser
 }
