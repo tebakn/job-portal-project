@@ -8,44 +8,42 @@ app.use(bodyParser.urlencoded({ extended: true }))
 
 app.get("/",(req,res)=>{
     res.status(200).end("Welcome Login to continue")
-
 })
 app.get("/toogleadm",sup.tooglelogin)
 
 app.post("/candidate",sup.login)
+app.post("/recruiter",sup.login)
 
 
 
-app.get("/candidate/:id",(req,res)=>{
 
-    res.send("Welcome user "+JSON.stringify(sup.logindet()))
-})
+app.get("/candidate/:id",sup.logindet)
+app.get("/recruiter/:id",sup.logindet)
+
+
 app.get("/candidate/:id/jobs",sup.getjobs)
+app.get("/recruiter/:id/jobs",sup.getjobs)
 
-app.post("/candidate/:id/jobs",sup.getjobs)
+
+//app.post("/candidate/:id/jobs",sup.getjobs)
+
+
+app.get("/candidate/:id/applications",sup.getapplications)
+app.get("/recruiter/:id/applications/",sup.getapplications)
+
 
 app.post("/candidate/:id/jobs/:jid",sup.apply)
 
-app.get("/candidate/:id/applications",sup.getapplications)
-
- app.post("/recruiter",sup.login)
-  
-
-
-app.get("/recruiter/:id",(req,res)=>{
-    res.send("Welcome user "+JSON.stringify(sup.logindet()))
-})
-app.get("/recruiter/:id/applications/",sup.getapplications)
-
-app.post("/recruiter/:id/applications/",sup.getapplications)
 
 app.get("/recruiter/:id/candidates/",sup.getcandidates)
 
-app.post("/recruiter/:id/candidates/",sup.getcandidates)
 
 app.patch("/recruiter/:id/applications/:jid/:cid",sup.updatestatus)
 
-app.get("/recruiter/:id/jobs",sup.getjobs)
+
+// app.get("/new:name",(req,res)=>{
+//     res.end(req.params.name)
+// })
 
 app.post("/recruiter/:id/jobs",sup.insertjobs)
 

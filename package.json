@@ -1,0 +1,27 @@
+{
+  "name": "job-portal",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tebakn/job-portal-project.git"
+  },
+  "author": "Naman Tebak",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tebakn/job-portal-project/issues"
+  },
+  "homepage": "https://github.com/tebakn/job-portal-project#readme",
+  "dependencies": {
+    "@hapi/joi": "^17.1.0",
+    "@hapi/joi-date": "^2.0.1",
+    "chai": "^4.2.0",
+    "chai-http": "^4.3.0",
+    "joi": "^14.3.1",
+    "mocha": "^7.0.1"
+  }
+}
