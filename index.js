@@ -11,6 +11,9 @@ app.get("/",(req,res)=>{
 })
 app.get("/toogleadm",api.tooglelogin)
 
+app.get("/logout",api.logout)
+
+
 app.post("/candidate",api.login)
 app.post("/recruiter",api.login)
 
@@ -33,19 +36,20 @@ app.get("/recruiter/:id/applications/",api.getapplications)
 
 
 app.post("/candidate/:id/jobs/:jid",api.apply)
+app.delete("/candidate/:id/applications/:jid",api.delete)
 
 
 app.get("/recruiter/:id/candidates/",api.getcandidates)
 
-
 app.patch("/recruiter/:id/applications/:jid/:cid",api.updatestatus)
-
 
 // app.get("/new:name",(req,res)=>{
 //     res.end(req.params.name)
 // })
 
 app.post("/recruiter/:id/jobs",api.insertjobs)
+app.delete("/recruiter/:id/jobs/:jid",api.delete)
+
 
 var server = app.listen(8081, function () {
     var host = server.address().address

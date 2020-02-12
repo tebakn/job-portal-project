@@ -11,6 +11,12 @@ function getLogininfo(){
 function getDatainfo(){
     return gotdata
 }
+function clearLogininfo(){
+    loginuser=undefined
+}
+function clearDatainfo(){
+    gotdata=undefined
+}
 async function setLogininfo(obj){
     let failflag=false;
     out=await validate.validatelogin(obj)
@@ -46,8 +52,8 @@ function validuser(id,user){
     id=Number(id)
     if (String(id)==='NaN')
         return false
-    console.log(loginuser)
-    console.log(user)
+    // console.log(loginuser)
+    // console.log(user)
     if (loginuser===undefined)
         return false
     if (loginuser.id!==id && loginuser.id!==10001)
@@ -59,7 +65,7 @@ function validuser(id,user){
     return true
 }
 function filterdata(filter){
-    console.log(filter)
+    // console.log(filter)
     page=filter.$paginate_page || 1
     limit=filter.$paginate_limit || 5
      delete filter.$paginate_page
@@ -102,7 +108,9 @@ function comparator(dbrowobj,filterobj,filterkey){
         compute=(a,b)=>{return Number(b[0])<=Number(a) && Number(a)<=Number(b[1])}
 
     else
-        compute=(a,b)=>{return a===b}
+        {compute=(a,b)=>{return Number(a)===Number(b)}
+        keyarr.push(last)
+    }
     filterdbkey=keyarr.join('_')
 
     if (dbrowobj[filterdbkey.toLowerCase()]!==undefined)
@@ -140,6 +148,8 @@ module.exports={
     setDatainfo,
     getLogininfo,
     setLogininfo,
+    clearDatainfo,
+    clearLogininfo,
     filterdata,
     dbcon,
     validuser

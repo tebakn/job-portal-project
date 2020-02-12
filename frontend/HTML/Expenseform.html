@@ -4,13 +4,22 @@
   <head>
     <meta charset="utf-8">
     <title>Expense</title>
+    <style>
+    form{
+        padding-left:25% ;
+        padding-right:25% ;
+
+    }
+    </style>
+    <script type="text/javascript">
+    </script>
 </head>
 
 <body>
 
-<form  method=post enctype=applications/json>
+<form  method=post enctype=applications/json >
     <fieldset id="general">
-        <legend></legend>
+        <legend>General</legend>
         <p>
             <label for="Billing_to">Billing</label>
             <select id="billing_to" name="billing_to">
@@ -56,7 +65,7 @@
         </p>
       </fieldset>
       <fieldset>
-        <legend>FOOD</legend>
+        <legend>Food    </legend>
         <p>
             <label for="dinners">Number of Dinners</label>
             <input type="number" min=0 step=1>

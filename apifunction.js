@@ -13,6 +13,7 @@ function logindet(req,res){
     }
     res.status(200).end("Welcome user "+ JSON.stringify({id:sup.getLogininfo().id,name:sup.getLogininfo().name}))
 }
+
 async function getcandidates(req,res){
     if(!sup.validuser(req.params.id,"recruiter")){
         if (sup.getLogininfo()===undefined)
@@ -121,7 +122,7 @@ async function insertjobs(req,res){
         })
     if (failflag)
         return
-    console.log("OUTPUT",out)
+    // console.log("OUTPUT",out)
     client=sup.dbcon()
     await client.connect()
     .then(()=>console.log("WOHOO"))
@@ -180,7 +181,7 @@ async function getapplications(req,res){
         res.end(JSON.stringify(sup.filterdata(req.query).results))
         return
     }
-    console.log(req.path.split('/'))
+    // console.log(req.path.split('/'))
     if (req.path.split('/')[1]=="candidate"){
         client=sup.dbcon()
         await client.connect()
@@ -240,7 +241,7 @@ async function apply(req,res){
         res.status(201).end(`created new application for (${req.params.jid},${req.params.id})`)
     })
     .catch((e)=>{
-        console.log(e.message.match('constraint "applications_job_id_fkey"'))
+        // console.log(e.message.match('constraint "applications_job_id_fkey"'))
         if (e.message.match('constraint "applications_job_id_fkey"')!==null)
             res.status(400).end("incorrect job id")
         else if(e.message.match('constraint "applications_pkey"')!==null)
@@ -254,7 +255,7 @@ async function apply(req,res){
 async function login(req,res){
     if (sup.getLogininfo()!==undefined)
         res.status(401).end("LOGINUSER EXISTS")
-    inp={id: req.body.username, pass: req.body.password}
+    console.log(inp)
     user=req.path.split('/')[1]
     let ret;
 
@@ -288,20 +289,77 @@ async function login(req,res){
         }
                     //console.log(ret,result.rows[0].user_id)  
     })
+    .finally(()=>{client.end();})
+}
+async function deletefromtable(req,res){
+    if (sup.getLogininfo()===undefined){
+        res.status(401).end("Login First")
+        return
+    }
+    else if(sup.getLogininfo().id!==10001){
+        res.status(401).end(`Invalid ID token`)
+        return
+    }
+    client=sup.dbcon()
+    try{
+        if (req.path.split('/')[1]=="candidate" && req.path.split('/')[3]=="applications"){
 
+        await client.connect()
+        .then(()=>{
+            q=`delete from applications where job_id=${req.params.jid} and candidate_id=${req.params.id};`
+            return client.query(q)
+        })
+        .then((results)=>{
+            if(results.rowCount===0)
+                res.status(200).end(`Application ${req.params.jid} ,${req.params.id} does not exists`)
+            else
+                res.status(200).end(`Successfully deleted ${req.params.jid} ,${req.params.id} from applications`)
+        })
+        .catch((e)=>{throw e;})
+        .finally(()=>{client.end()})
+        }
+        else{
+            await client.connect()
+            .then(()=>{
+                q=`delete from jobs where job_id=${req.params.jid} and owner_id=${req.params.id};`
+                return client.query(q)
+            })
+            .then((results)=>{
+                if(results.rowCount===0)
+                    res.status(200).end(`Job ${req.params.jid} ,${req.params.id} does not exists`)
+                else
+                    res.status(200).end(`Successfully deleted ${req.params.jid} ,${req.params.id} from jobs`)
+            })
+            .catch((e)=>{ throw e;})
+            .finally(()=>{client.end()})
+            }
+        }   
+        catch(e){
+            if(e.message.match('constraint "applications_job_id_fkey"')!==null)
+                res.status(400).end("Delete applications first")
+            else
+            throw e;
+        }
 
 }
 async function tooglelogin(req,res){
-    if (sup.getLogininfo()===undefined)
+    if (sup.getLogininfo()===undefined) 
         await sup.setLogininfo({id:10001,name:"NAMANAMAN"})
     else
-        sup.getLogininfo()=undefined
+        await logout({},{status:(stat)=>{
+            return {end :((message)=>{console.log(`${message} with ${stat} `)})}}})
     res.status(200).end("ADMIN")
+}
+async function logout(req,res){
+    sup.clearDatainfo()
+    sup.clearLogininfo()
+    res.status(200).end("Logged out successfully")
 }
 
 
 
 module.exports={
+    delete:deletefromtable,
     apply,
     logindet,
     login,
@@ -310,5 +368,6 @@ module.exports={
     getcandidates,
     insertjobs,
     updatestatus,
-    tooglelogin
+    tooglelogin,
+    logout
 }

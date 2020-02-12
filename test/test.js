@@ -32,6 +32,7 @@ describe('ADM', () => {
             });
         });
   
+
    describe('/GET admin id', () => {
         it('Welcome user with code 200', (done) => {
           chai.request(server)
@@ -45,19 +46,66 @@ describe('ADM', () => {
               });
         });
     });
+
+
+
     describe('/GET jobs and applications', () => {
-        it('Display jobs with code 200', (done) => {
+      let delappflag=false;
+      let deljobflag=false;
+      before('Display applications with code 200',(done) => {
+        chai.request(server)
+            .get('/candidate/2/applications?job_id=56')
+            .end((err, res) => {
+                  res.should.have.status(200);
+                        console.log(res.text)
+                  JSON.parse(res.text).should.be.a('array');
+                  if (JSON.parse(res.text).length !== 0)
+                      delappflag=true;
+                      console.log(delappflag)
+
+              done();
+            });
+      console.log(delappflag)
+      if(delappflag){
+        it('delete job if exists with code 200', (done) => {
           chai.request(server)
-              .get('/candidate/44/jobs')
+              .delete('/candidate/2/applications/56')
+              .end((err, res) => {
+                    res.should.have.status(200);
+                          console.log(res.text)
+                done();
+              });
+        });
+      }     
+     });
+
+
+
+        before('Display jobs with code 200', (done) => {
+          chai.request(server)
+              .get('/recruiter/119/jobs?job_id=56')
               .end((err, res) => {
                     res.should.have.status(200);
                           console.log(res.text)
                     JSON.parse(res.text).should.be.a('array');
-                    
+                    if (JSON.parse(res.text).length !== 0)
+                        deljobflag=true;
                 done();
               });
         });
-    });
+        if(deljobflag){
+          it('delete job if exists with code 200', (done) => {
+            chai.request(server)
+                .delete('/recruiter/119/jobs/56')
+                .end((err, res) => {
+                      res.should.have.status(200);
+                            console.log(res.text)
+                  done();
+                });
+          });
+        }
+
+
             it('Display applications with code 200', (done) => {
           chai.request(server)
               .get('/candidate/3/applications')
@@ -69,6 +117,7 @@ describe('ADM', () => {
                 done();
               });
         });
+    })
     describe('logout', () => {
         it('logout', (done) => {
           chai.request(server)
@@ -80,6 +129,133 @@ describe('ADM', () => {
         });
     });
 })
+
+
+
+
+describe('login recruiter', () => {
+  before("return user id with code 200",(done) => { 
+      chai.request(server)
+            .post('/recruiter')
+            .type('JSON')
+            .send({
+                'username':'dstiti',
+                "password":"S17diGUY"
+            })
+            .end((req,res)=>{
+              res.should.have.status(200)
+              res.text.should.be.equal('User 119')  
+              done();
+          });
+      });
+      
+      
+  describe('/GET details of user', () => {
+      it('welcome user with id and name', (done) => {
+        chai.request(server)
+            .get('/recruiter/119')
+            .end((err, res) => {
+                  res.should.have.status(200);
+                        console.log(res.text)
+                  res.text.should.be.equal('Welcome user {"id":119,"name":"Danielle"}');
+              done();
+            });
+      });
+      it('wrong user id', (done) => {
+          chai.request(server)
+              .get('/candidate/5')
+              .end((err, res) => {
+                    res.should.have.status(401);
+                          console.log(res.text)
+                    res.text.should.be.a('string');
+                    
+                done();
+              });
+        });
+      
+  });
+  describe('post job', () => {
+      it('return error with validation', (done) => {
+        chai.request(server)
+            .post('/recruiter/119/jobs/')
+            .type('JSON')
+            .send({
+              'job_id': '56',
+              'name': 'firstjob',
+              'deparent': 'it',
+              'availability': '10',
+              'joining_date': '2020/03/01',
+              'skills': 'JAVA',
+              'isopen': 'true'
+            })
+            .end((err, res) => {
+                  res.should.have.status(400);
+                        console.log(res.text)
+                  res.text.should.be.a('string');
+                  
+              done();
+            });
+      });
+      it('return job id inserted', (done) => {
+          chai.request(server)
+              .post('/recruiter/119/jobs/')
+              .type('JSON')
+              .send({
+                'job_id': '56',
+                'name': 'firstjob',
+                'department': 'it',
+                'availability': '10',
+                'joining_date': '2020/03/01',
+                'skills': 'JAVA',
+                'isopen': 'true'
+              })
+              .end((err, res) => {
+                    res.should.have.status(201);
+                          console.log(res.text)
+                    res.text.should.be.equal('Job inserted with ID 56');
+                    
+                done();
+              });
+        });
+      it('error as the job is already inserted with status 400', (done) => {
+          chai.request(server)
+              .post('/recruiter/119/jobs/')
+              .type('JSON')
+              .send({
+                'job_id': '56',
+                'name': 'firstjob',
+                'department': 'it',
+                'availability': '10',
+                'joining_date': '2020/03/01',
+                'skills': 'JAVA',
+                'isopen': 'true'
+              })
+              .end((err, res) => {
+                    res.should.have.status(400);
+                          console.log(res.text)
+                    res.text.should.be.equal("Job id exists");
+                    
+                done();
+              });
+              });
+  })
+  describe('logout', () => {
+    it('logout', (done) => {
+      chai.request(server)
+          .get('/logout')
+          .end((err, res) => {
+                res.should.have.status(200);
+            done();
+          });
+    });
+});
+})
+
+
+
+
+
+
 
 describe('login candidate', () => {
 before("return user id with code 200",(done) => { 
@@ -157,7 +333,7 @@ describe('apply for job', () => {
 describe('logout', () => {
     it('logout', (done) => {
       chai.request(server)
-          .get('/toogleadm')
+          .get('/logout')
           .end((err, res) => {
                 res.should.have.status(200);
             done();
@@ -168,110 +344,4 @@ describe('logout', () => {
 })
 
 
-describe('login recruiter', () => {
-    before("return user id with code 200",(done) => { 
-        chai.request(server)
-              .post('/recruiter')
-              .type('JSON')
-              .send({
-                  'username':'aappleyard3',
-                  "password":"Uyl1z8uWW"
-              })
-              .end((req,res)=>{
-                res.should.have.status(200)
-                res.text.should.be.equal('User 104')  
-                done();
-            });
-        });
-        
-        
-    describe('/GET details of user', () => {
-        it('welcome user with id and name', (done) => {
-          chai.request(server)
-              .get('/recruiter/104')
-              .end((err, res) => {
-                    res.should.have.status(200);
-                          console.log(res.text)
-                    res.text.should.be.equal('Welcome user {"id":104,"name":"Ainsley"}');
-                done();
-              });
-        });
-        it('wrong user id', (done) => {
-            chai.request(server)
-                .get('/candidate/5')
-                .end((err, res) => {
-                      res.should.have.status(401);
-                            console.log(res.text)
-                      res.text.should.be.a('string');
-                      
-                  done();
-                });
-          });
-        
-    });
-    describe('post job', () => {
-        it('return error with validation', (done) => {
-          chai.request(server)
-              .post('/recruiter/104/jobs/')
-              .type('JSON')
-              .send({
-                'job_id': '5555',
-                'name': 'firstjob',
-                'deparent': 'it',
-                'availability': '10',
-                'joining_date': '2020/03/01',
-                'skills': 'JAVA',
-                'isopen': 'true'
-              })
-              .end((err, res) => {
-                    res.should.have.status(400);
-                          console.log(res.text)
-                    res.text.should.be.a('string');
-                    
-                done();
-              });
-        });
-        it('return job id inserted', (done) => {
-            chai.request(server)
-                .post('/recruiter/104/jobs/')
-                .type('JSON')
-                .send({
-                  'job_id': '5555',
-                  'name': 'firstjob',
-                  'department': 'it',
-                  'availability': '10',
-                  'joining_date': '2020/03/01',
-                  'skills': 'JAVA',
-                  'isopen': 'true'
-                })
-                .end((err, res) => {
-                      res.should.have.status(201);
-                            console.log(res.text)
-                      res.text.should.be.equal('Job inserted with ID 5555');
-                      
-                  done();
-                });
-          });
-        it('error as the job is already inserted with status 400', (done) => {
-            chai.request(server)
-                .post('/recruiter/104/jobs/')
-                .type('JSON')
-                .send({
-                  'job_id': '5555',
-                  'name': 'firstjob',
-                  'department': 'it',
-                  'availability': '10',
-                  'joining_date': '2020/03/01',
-                  'skills': 'JAVA',
-                  'isopen': 'true'
-                })
-                .end((err, res) => {
-                      res.should.have.status(400);
-                            console.log(res.text)
-                      res.text.should.be.equal("Job id exists");
-                      
-                  done();
-                });
-                });
-    })})
     

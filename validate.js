@@ -1,24 +1,24 @@
 joi=require('joi')
 //.extend(require('@hapi/joi-date'));
 
-function validateCandidate(customer){
-    const schema ={
-        username: joi.string().min(3).max(30).required(),
-        password: joi.string().regex(/^[a-zA-Z0-9]{3,30}$/),
-        email: joi.string().email({ minDomainAtoms: 2 }),
-        phoneno: joi.number()
-    };
-    return joi.validate(customer,schema);
-}
-function validateRecruiter(recruiter){
-    const schema ={
-        username: joi.string().min(3).max(30).required(),
-        password: joi.string().regex(/^[a-zA-Z0-9]{3,30}$/),
-        email: joi.string().email({ minDomainAtoms: 2 }),
-        phoneno: joi.number()
-    };
-    return joi.validate(recruiter,schema);
-}
+// function validateCandidate(customer){
+//     const schema ={
+//         username: joi.string().min(3).max(30).required(),
+//         password: joi.string().regex(/^[a-zA-Z0-9]{3,30}$/),
+//         email: joi.string().email({ minDomainAtoms: 2 }),
+//         phoneno: joi.number()
+//     };
+//     return joi.validate(customer,schema);
+// }
+// function validateRecruiter(recruiter){
+//     const schema ={
+//         username: joi.string().min(3).max(30).required(),
+//         password: joi.string().regex(/^[a-zA-Z0-9]{3,30}$/),
+//         email: joi.string().email({ minDomainAtoms: 2 }),
+//         phoneno: joi.number()
+//     };
+//     return joi.validate(recruiter,schema);
+// }
 function validateGotData(dataobj){
     const schema ={
         api: joi.string().required(),
