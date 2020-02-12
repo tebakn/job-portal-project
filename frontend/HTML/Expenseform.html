@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <title>Expense</title>
+</head>
+
+<body>
+
+<form  method=post enctype=applications/json>
+    <fieldset id="general">
+        <legend></legend>
+        <p>
+            <label for="Billing_to">Billing</label>
+            <select id="billing_to" name="billing_to">
+                <option value="Talview" selected>Talview</option>
+                <option value="Client">Client</option>
+            </select>
+            <label for="client">Client</label>
+            <select id="client" name="client">
+                <option value="c1">client1</option>
+                <option value="c2">client2</option>
+            </select>
+        </p>
+        <p>
+            <label for="food">Food</label>
+            <input type="radio" id="food" name="category">
+            <label for="travel">travel</label>
+            <input type="radio" id="food" name="category">
+            <label for="stay">Stay</label>
+            <input type="radio" id="stay" name="category">
+            <label for="other">other</label>
+            <input type="radio" id="other" name="category">
+        </p>
+        <p>
+            <label for="remark">Remarks
+                <abbr title="Required">*</abbr>
+            </label>
+            <textarea  id="remark" name="remark"></textarea>
+        </p>
+        <p>
+            <label for="invoice">Bill and Invoice
+                <abbr title="Required">*</abbr>
+            </label>
+            <input type="file"  id="invoice" name="invoice" accepts="image/*" required>
+        </p>
+        <p>
+            <label for="amount">Amount</label>
+            <input type="number" id="amount" name="amount" min=0>
+            <button type="button" id="addmore" name="addmore">+</button>
+        </p>
+        <p>
+                <label for="billdate">Bill Date</label>
+                <input type="date" id="billdate" name="billdate">
+        </p>
+      </fieldset>
+      <fieldset>
+        <legend>FOOD</legend>
+        <p>
+            <label for="dinners">Number of Dinners</label>
+            <input type="number" min=0 step=1>
+        </p>
+      </fieldset>
+      <fieldset>
+        <legend>Travel</legend>
+        <p>
+            <label for="mode">Mode</label>
+            <select id="mode" name="mode">
+                <option value="cab">Cab</option>
+                <option value="bus">bus</option>
+                <option value="train">Train</option>
+                <option value="flight">Flight</option>
+            </select>
+        </p>
+        <p>
+            <label for="from">From</label>
+            <input type="text" id="from">
+            <label for="to">To</label>
+            <input type="text" id="To">
+        </p>
+      </fieldset>
+      <fieldset>
+        <legend>Stay</legend>
+        <p>
+            <label for="fromdate">fromdate</label>
+            <input type="date" id="fromdate">
+            <label for="todate">fromdate</label>
+            <input type="date" id="todate">
+        </p>
+        <p>
+            <label for="place">Place of Stay</label>
+            <input type="text" id="place">
+            <label for="destination">Destination/city/state/country</label>
+            <input type="text" id="destination">
+        </p>
+      </fieldset>
+      <button type="submit">Save</button>
+      <button type="reset">Cancel</button>
+
+</form>
+</body>
+
+</html>
