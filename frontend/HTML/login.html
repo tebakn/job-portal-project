@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <title>Login Form</title>
+    <link rel="stylesheet" href="../CSS/firstcss.css" type="text/css">
+</head>
+
+<body>
+
+<form  method=post enctype=applications/json>
+<h1>Enter Details</h1>
+<label for="name">Username:</label> <input type="text" name="username" id="username">
+<label for="password">password:</label> <input type="password" name="password" id="password">
+<button type="button" formaction="http://localhost:8081/candidate" id="candidate login" name="candidate login">Candidate Login</button>
+<button type="button" formaction="http://localhost:8081/recruiter" id="recruiter login" name="recruiter login">Recruiter Login</button>
+
+</form>
+</body>
+
+</html>

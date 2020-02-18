@@ -11,40 +11,49 @@
 
     }
     </style>
-    <script type="text/javascript">
-    </script>
+
 </head>
 
 <body>
 
-<form  method=post enctype=applications/json >
+<form action="http://localhost:8082/" method=post enctype=applications/json >
+
     <fieldset id="general">
         <legend>General</legend>
+
         <p>
             <label for="Billing_to">Billing</label>
             <select id="billing_to" name="billing_to">
+
                 <option value="Talview" selected>Talview</option>
+
                 <option value="Client">Client</option>
             </select>
+
             <label for="client">Client</label>
             <select id="client" name="client">
+
                 <option value="c1">client1</option>
+
                 <option value="c2">client2</option>
             </select>
         </p>
         <p>
+            <input type="radio" id="food" name="category" value="food" required>
             <label for="food">Food</label>
-            <input type="radio" id="food" name="category">
+
+            <input type="radio" id="travel" name="category" value="travel">
             <label for="travel">travel</label>
-            <input type="radio" id="food" name="category">
+
+            <input type="radio" id="stay" name="category" value="stay" >
             <label for="stay">Stay</label>
-            <input type="radio" id="stay" name="category">
+
+            <input type="radio" id="other" name="category" value="other" >
             <label for="other">other</label>
-            <input type="radio" id="other" name="category">
         </p>
         <p>
             <label for="remark">Remarks
-                <abbr title="Required">*</abbr>
+                <abbr title="Required" id="requireremark" hidden>*</abbr>
             </label>
             <textarea  id="remark" name="remark"></textarea>
         </p>
@@ -57,6 +66,7 @@
         <p>
             <label for="amount">Amount</label>
             <input type="number" id="amount" name="amount" min=0>
+
             <button type="button" id="addmore" name="addmore">+</button>
         </p>
         <p>
@@ -64,42 +74,55 @@
                 <input type="date" id="billdate" name="billdate">
         </p>
       </fieldset>
-      <fieldset>
-        <legend>Food    </legend>
+
+      <fieldset id="foodbill" hidden>
+        <legend>Food</legend>
+
         <p>
             <label for="dinners">Number of Dinners</label>
             <input type="number" min=0 step=1>
         </p>
       </fieldset>
-      <fieldset>
+
+      <fieldset id="travelbill" hidden>
         <legend>Travel</legend>
+
         <p>
             <label for="mode">Mode</label>
             <select id="mode" name="mode">
+
                 <option value="cab">Cab</option>
+
                 <option value="bus">bus</option>
+
                 <option value="train">Train</option>
+
                 <option value="flight">Flight</option>
             </select>
         </p>
         <p>
             <label for="from">From</label>
             <input type="text" id="from">
+
             <label for="to">To</label>
             <input type="text" id="To">
         </p>
       </fieldset>
-      <fieldset>
+
+      <fieldset id="staybill" hidden>
         <legend>Stay</legend>
+
         <p>
             <label for="fromdate">fromdate</label>
             <input type="date" id="fromdate">
+
             <label for="todate">fromdate</label>
             <input type="date" id="todate">
         </p>
         <p>
             <label for="place">Place of Stay</label>
             <input type="text" id="place">
+
             <label for="destination">Destination/city/state/country</label>
             <input type="text" id="destination">
         </p>
@@ -109,5 +132,9 @@
 
 </form>
 </body>
+<script type="text/javascript" >
+
+
+</script>
 
 </html>

@@ -4,10 +4,13 @@ const api=require('./apifunction');
 let app = express();
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
+app.use('/front',express.static('frontend'))
+app.use('/semantic',express.static('semantic'))
+
 
 
 app.get("/",(req,res)=>{
-    res.status(200).end("Welcome Login to continue")
+    res.status(200).sendFile("/home/local/INTERNAL/naman.t/job-portal/frontend/HTML/candidateprofile.html")
 })
 app.get("/toogleadm",api.tooglelogin)
 
@@ -16,9 +19,6 @@ app.get("/logout",api.logout)
 
 app.post("/candidate",api.login)
 app.post("/recruiter",api.login)
-
-
-
 
 app.get("/candidate/:id",api.logindet)
 app.get("/recruiter/:id",api.logindet)
