@@ -32,7 +32,8 @@ async function getcandidates(req,res){
         await client.connect()
         .then(()=>console.log("WOHOO"))
         .then(()=>{
-            let q=`select first_name,last_name,gender,email,phone_number,skills,education \
+                //CHANGE
+            let q=`select first_name,last_name,gender,email,phone_number,education \
             from candidate INNER JOIN personal_details ON candidate.candidate_id=personal_details.user_id ;`;
             return client.query(q);
         })
@@ -129,7 +130,7 @@ async function insertjobs(req,res){
     .then(()=>{
         let q=`Insert into jobs \
              values('${job.job_id}','${job.name}','${job.salary}','${job.department}','${job.availability}'\
-             ,'${job.joining_date}','${job.skills}','${job.isopen}','${req.params.id}');`
+             ,'${job.joining_date}','${job.isopen}','${req.params.id}',(select now()),(select now()));`
                 ret=client.query(q);
                 return ret  
     })
@@ -156,7 +157,7 @@ async function updatestatus(req,res){
         await client.connect()
         .then(()=>console.log("WOHOO"))
         .then(()=>{
-            let q=`update application set status=${req.boody.status} where job_id=${req.params.jid} and candidate_id=${req.params.cid};`;
+            let q=`update application set status=${req.body.status},updated_at=(select now()) where job_id=${req.params.jid} and owner_id=${req.params.id} and candidate_id=${req.params.cid};`;
             return client.query(q);
         })
         .then((result)=>{
@@ -203,8 +204,8 @@ async function getapplications(req,res){
         client.connect()
         .then(()=>console.log("WOHOO"))
         .then(()=>{
-            let q=`select candidate_id,applications.job_id,status from applications,jobs\
-             where applications.job_id=jobs.job_id and jobs.owner_id=${req.params.id};`;
+            let q=`select candidate_id,job_id,status from applications\
+             where owner_id=${req.params.id};`;
             return client.query(q);
         })
         .then(async (result)=>{
@@ -230,11 +231,13 @@ async function apply(req,res){
             res.status(401).end(`Invalid ID token`)
         return
     }
+    jid=req.params.ojid.split(":")[0]
+    oid=req.params.ojid.split(":")[1]
     client=sup.dbcon()
     await client.connect()
     .then(()=>console.log("WOHOO"))
     .then(()=>{
-        let q=`Insert into applications (job_id,candidate_id) values (${req.params.jid},${req.params.id});`;
+        let q=`Insert into applications (job_id,candidate_id,owner_id) values (${jid},${req.params.id},${oid});`;
         return client.query(q);
     })
     .then((result)=>{
@@ -303,10 +306,12 @@ async function deletefromtable(req,res){
     client=sup.dbcon()
     try{
         if (req.path.split('/')[1]=="candidate" && req.path.split('/')[3]=="applications"){
+            jid=req.params.jid.split(':')[0]
+            oid=req.params.jid.split(':')[1]
 
         await client.connect()
         .then(()=>{
-            q=`delete from applications where job_id=${req.params.jid} and candidate_id=${req.params.id};`
+            q=`delete from applications where job_id=${jid} and candidate_id=${req.params.id} and owner_id=${oid};`
             return client.query(q)
         })
         .then((results)=>{
