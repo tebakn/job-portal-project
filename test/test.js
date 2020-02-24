@@ -52,7 +52,7 @@ describe('ADM', () => {
     describe('/GET jobs and applications', () => {
       let delappflag=false;
       let deljobflag=false;
-      before('Display applications with code 200',(done) => {
+      it('Display applications with code 200',(done) => {
         chai.request(server)
             .get('/candidate/2/applications?job_id=56')
             .end((err, res) => {
@@ -64,10 +64,9 @@ describe('ADM', () => {
                       console.log(delappflag)
 
               done();
-            });
-      console.log(delappflag)
-      if(delappflag){
-        it('delete job if exists with code 200', (done) => {
+            });})
+
+        it('delete job with code 200 if exists', (done) => {
           chai.request(server)
               .delete('/candidate/2/applications/56')
               .end((err, res) => {
@@ -76,12 +75,11 @@ describe('ADM', () => {
                 done();
               });
         });
-      }     
-     });
+      
 
 
 
-        before('Display jobs with code 200', (done) => {
+        it('Display jobs with code 200', (done) => {
           chai.request(server)
               .get('/recruiter/119/jobs?job_id=56')
               .end((err, res) => {
@@ -93,8 +91,7 @@ describe('ADM', () => {
                 done();
               });
         });
-        if(deljobflag){
-          it('delete job if exists with code 200', (done) => {
+          it('delete job with code 200 if exists', (done) => {
             chai.request(server)
                 .delete('/recruiter/119/jobs/56')
                 .end((err, res) => {
@@ -103,7 +100,7 @@ describe('ADM', () => {
                   done();
                 });
           });
-        }
+        
 
 
             it('Display applications with code 200', (done) => {

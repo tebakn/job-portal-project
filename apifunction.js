@@ -255,6 +255,7 @@ async function apply(req,res){
 async function login(req,res){
     if (sup.getLogininfo()!==undefined)
         res.status(401).end("LOGINUSER EXISTS")
+    inp={id:req.body.username , pass:req.body.password}
     console.log(inp)
     user=req.path.split('/')[1]
     let ret;
@@ -273,6 +274,7 @@ async function login(req,res){
         and recruiter_id=user_id ;`
         return client.query(q)})
     .then(async (result)=>{
+        console.log(result.rows)
         let candidate_details=result.rows[0]
         if (candidate_details===undefined)
             res.status(400).end("User not found");
