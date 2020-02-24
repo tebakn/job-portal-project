@@ -73,13 +73,14 @@ function filterdata(filter){
 
         try{
         filtered_result= gotdata.data.filter((values)=>{
-        
-        let ret= Object.keys(filter).reduce((tot,filtkey)=>{
-
-            return (tot && comparator(values,filter,filtkey))},true)
+            values.$sortby_attrval=0
+            let ret= Object.keys(filter).reduce((tot,filtkey)=>{
+            compval=comparator(values,filter,filtkey)
+            values.$sortby_attrval+=compval
+            return (tot && compval)},true)
         return ret; 
     })
-    return paginated(filtered_result,page,limit);
+    return paginated(filtered_result.sort((a,b)=>b.$sortby_attrval - a.$sortby_attrval),page,limit);
     }
     catch(e){throw e;}
 }
@@ -127,7 +128,7 @@ function  logic_comparator(db_attribute,filter_attribute){
     filter_attribute=filter_attribute[0]?filter_attribute:[filter_attribute]
     
     let common=db_attribute.filter((value)=>filter_attribute.includes(value))
-    return common[0]!==undefined
+    return common.length
 }
 function paginated(result,page,limit){
 
