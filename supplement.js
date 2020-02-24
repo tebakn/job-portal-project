@@ -96,19 +96,12 @@ function comparator(dbrowobj,filterobj,filterkey){
     }
 
     last=keyarr.pop()
-    let compute;
-
-    if (last.toLowerCase()==="isgreater")
-        compute=(a,b)=>{return Number(a) >= Number(b)}
-
-    else if(last.toLowerCase()==="isless")
-        compute=(a,b)=>{return Number(a)<= Number(b)}
-
-    else if (last.toLowerCase()==="isrange")
-        compute=(a,b)=>{return Number(b[0])<=Number(a) && Number(a)<=Number(b[1])}
-
-    else
-        {compute=(a,b)=>{return Number(a)===Number(b)}
+    let compute=arethmatic_comparator(last);
+    if(compute){
+        if (dbrowobj[filtkey.toLowerCase()] instanceof Array || filterobj[filtkey] instanceof Array)
+        compute=logic_comparator
+        else
+        compute=(a,b)=>{return Number(a)===Number(b)}
         keyarr.push(last)
     }
     filterdbkey=keyarr.join('_')
@@ -118,6 +111,25 @@ function comparator(dbrowobj,filterobj,filterkey){
         else
         throw  {name:'key error', message:`Key ${filterdbkey} is not present`}
 
+}
+function arethmatic_comparator(key_last){
+    if (key_last.toLowerCase()==="isgreater")
+    return (a,b)=>{return Number(a) >= Number(b)}
+
+else if(key_last.toLowerCase()==="isless")
+    return (a,b)=>{return Number(a)<= Number(b)}
+
+else if (key_last.toLowerCase()==="isrange")
+    return (a,b)=>{return Number(b[0])<=Number(a) && Number(a)<=Number(b[1])}
+else
+    return undefined
+}
+function  logic_comparator(db_attribute,filter_attribute){
+    db_attribute=db_attribute[0]?db_attribute:[db_attribute]
+    filter_attributefilter_attribute[0]?filter_attribute:[filter_attribute]
+    
+    let common=db_attribute.filter((value)=>filter_attribute.include(value))
+    return common!==[]
 }
 function paginated(result,page,limit){
 
