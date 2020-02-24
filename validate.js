@@ -32,19 +32,21 @@ function validatelogin(loginobj){
         id: joi.number().integer(),
         name: joi.string().required(),
         company: joi.string(),
-        skill: joi.string()
+        skill: joi.array().items(joi.string())
     };
     return joi.validate(loginobj,schema);
 } 
 function validatejob(jobs){
+    console.log(jobs)
     const schema ={
         job_id: joi.number().integer().required(),
-        name: joi.string().min(5).required(),
+        name: joi.string().regex(/\D/).min(5).required(),
         salary: joi.number(),
         department: joi.string().required(),
         availability: joi.string().required(),
         joining_date: joi.date().required(),
-        skills: joi.string().required(),
+        skills: joi.array().items(joi.string().regex(/\D/)).required().min(1),
+        priority: joi.array().items(joi.number().min(0).max(5)).min(1),
         isopen: joi.boolean().required()
     };
     return joi.validate(jobs,schema);

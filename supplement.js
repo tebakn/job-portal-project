@@ -21,7 +21,6 @@ async function setLogininfo(obj){
     let failflag=false;
     out=await validate.validatelogin(obj)
     .catch((e)=>{
-        res.status(500).end(e.message)
         failflag=true;
         })
     if (failflag)
@@ -32,7 +31,6 @@ async function setDatainfo(obj){
     let failflag=false;
     out=await validate.validateGotData(obj)
     .catch((e)=>{
-        res.status(500).end(e.message)
         failflag=true;
         })
     if (failflag)
@@ -45,7 +43,7 @@ function dbcon(){
         password:"1234",
         host:"desk-naman",
         port:5432,
-        database:"portal"
+        database:"newportal"
     }))
 }
 function validuser(id,user){
@@ -65,7 +63,7 @@ function validuser(id,user){
     return true
 }
 function filterdata(filter){
-    // console.log(filter)
+    console.log(filter)
     page=filter.$paginate_page || 1
     limit=filter.$paginate_limit || 5
      delete filter.$paginate_page
@@ -94,18 +92,18 @@ function comparator(dbrowobj,filterobj,filterkey){
         else
             throw  {name:'key error', message:`Key ${filterkey} is not present`}
     }
-
     last=keyarr.pop()
+
     let compute=arethmatic_comparator(last);
-    if(compute){
-        if (dbrowobj[filtkey.toLowerCase()] instanceof Array || filterobj[filtkey] instanceof Array)
-        compute=logic_comparator
+    if(compute===undefined){
+        if (dbrowobj[filterkey.toLowerCase()] instanceof Array || filterobj[filterkey] instanceof Array){
+            compute=logic_comparator
+        }
         else
-        compute=(a,b)=>{return Number(a)===Number(b)}
+            compute=(a,b)=>{return Number(a)===Number(b)}
         keyarr.push(last)
     }
     filterdbkey=keyarr.join('_')
-
     if (dbrowobj[filterdbkey.toLowerCase()]!==undefined)
             return compute(dbrowobj[filterdbkey.toLowerCase()],filterobj[filterkey])
         else
@@ -126,10 +124,10 @@ else
 }
 function  logic_comparator(db_attribute,filter_attribute){
     db_attribute=db_attribute[0]?db_attribute:[db_attribute]
-    filter_attributefilter_attribute[0]?filter_attribute:[filter_attribute]
+    filter_attribute=filter_attribute[0]?filter_attribute:[filter_attribute]
     
-    let common=db_attribute.filter((value)=>filter_attribute.include(value))
-    return common!==[]
+    let common=db_attribute.filter((value)=>filter_attribute.includes(value))
+    return common[0]!==undefined
 }
 function paginated(result,page,limit){
 

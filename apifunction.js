@@ -11,7 +11,7 @@ function logindet(req,res){
             res.status(401).end(`Invalid ID token`)
         return
     }
-    res.status(200).end("Welcome user "+ JSON.stringify({id:sup.getLogininfo().id,name:sup.getLogininfo().name}))
+    res.status(200).end("Welcome user "+ JSON.stringify(sup.getLogininfo()))
 }
 
 async function getcandidates(req,res){
@@ -33,13 +33,15 @@ async function getcandidates(req,res){
         .then(()=>console.log("WOHOO"))
         .then(()=>{
                 //CHANGE
-            let q=`select first_name,last_name,gender,email,phone_number,education \
-            from candidate INNER JOIN personal_details ON candidate.candidate_id=personal_details.user_id ;`;
+            let q=`select candidate_id,array_agg(skills) as skills_list,first_name,last_name,gender,email,phone_number,education \
+            from candidate_skill,personal_details where candidate_skill.candidate_id=personal_details.user_id \
+            group by(candidate_id,first_name,last_name,gender,email,phone_number,education) order by candidate_id;`;
             return client.query(q);
         })
         .then(async (result)=>{
             await sup.setDatainfo({api:"candidate",data:result.rows})
             res.status(200).end(JSON.stringify(sup.filterdata(req.query).results))
+            
         })
         .catch((e)=>{
             throw e;
@@ -71,7 +73,9 @@ async function getjobs(req,res){
         await client.connect()
         .then(()=>console.log("WOHOO"))
         .then(()=>{
-            let q=`select * from jobs where isopen='true';`;
+            let q=`select jobs.job_id,name,salary,department,availabilty,array_agg(skills) as required_skills,joining_date,jobs.owner_id \
+            from jobs,job_skill where isopen='true' and jobs.job_id=job_skill.job_id and jobs.owner_id=job_skill.owner_id \
+            group by (jobs.job_id,name,salary,department,availabilty,joining_date,jobs.owner_id) order by jobs.job_id;`;
             return client.query(q);
         })
         .then(async (result)=>{
@@ -87,7 +91,9 @@ async function getjobs(req,res){
         await client.connect()
         .then(()=>console.log("WOHOO"))
         .then(()=>{
-            let q=`select * from jobs where owner_id=${req.params.id};`;
+            let q=`select jobs.job_id,name,salary,department,availabilty,array_agg(skills) as required_skills,joining_date,jobs.owner_id \
+            from jobs,job_skill where isopen='true' and jobs.job_id=job_skill.job_id and jobs.owner_id=${req.params.id} \
+            group by (jobs.job_id,name,salary,department,availabilty,joining_date,jobs.owner_id) order by jobs.job_id;`;
             return client.query(q);
         })
         .then(async (result)=>{
@@ -123,22 +129,44 @@ async function insertjobs(req,res){
         })
     if (failflag)
         return
+
+    else if(job.skills.length!==job.priority.length){
+        res.status(400).end("Skills and Priority must have similar lengths")
+        return
+    }
     // console.log("OUTPUT",out)
     client=sup.dbcon()
     await client.connect()
     .then(()=>console.log("WOHOO"))
+    .then(()=>client.query("Begin;"))
     .then(()=>{
-        let q=`Insert into jobs \
+        let q=`Insert into jobs(job_id,name,salary,department,availabilty,joining_date,isopen,owner_id,created_at,updated_at) \
              values('${job.job_id}','${job.name}','${job.salary}','${job.department}','${job.availability}'\
              ,'${job.joining_date}','${job.isopen}','${req.params.id}',(select now()),(select now()));`
-                ret=client.query(q);
-                return ret  
+                return client.query(q);
     })
+    .then(()=>{
+        let initq=`values('${job.job_id}','${req.params.id}','${job.skills[0]}','${job.priority[0]}',(select now()),(select now()))`
+
+        intermedq=job.skills.slice(1).reduce((tot,value,valind) => {
+                return (tot + `,('${job.job_id}','${req.params.id}','${value}','${job.priority[valind+1]}',(select now()),(select now()))`)
+            },initq);
+
+        let q=`insert into job_skill ${intermedq} ;`;
+        console.log(q)
+        return client.query(q);
+    })
+    .then(()=>client.query("commit;"))
     .then(()=>{
     res.status(201).end(`Job inserted with ID ${job.job_id}`)})
     .catch((e)=>{
-        if (e.message.match('constraint "jobs_pkey"')!==-1)
+        console.log(e.name)
+        if (e.message.match('constraint "jobs_pkey"')!==null)
             res.status(400).end("Job id exists")
+        else if(e.message.match('constraint "job_skill_pkey"')!==null){
+            //client.query("rollback;")
+            res.status(400).end("Duplicate Skill")
+        }
         else
             throw e;
     })
@@ -241,7 +269,7 @@ async function apply(req,res){
         return client.query(q);
     })
     .then((result)=>{
-        res.status(201).end(`created new application for (${req.params.jid},${req.params.id})`)
+        res.status(201).end(`created new application for (${req.params.ojid},${req.params.id})`)
     })
     .catch((e)=>{
         // console.log(e.message.match('constraint "applications_job_id_fkey"'))
@@ -258,6 +286,7 @@ async function apply(req,res){
 async function login(req,res){
     if (sup.getLogininfo()!==undefined)
         res.status(401).end("LOGINUSER EXISTS")
+    inp={id:req.body.username ,pass:req.body.password }
     console.log(inp)
     user=req.path.split('/')[1]
     let ret;
@@ -269,8 +298,8 @@ async function login(req,res){
     .then(()=>{
         let q;
         if (user==="candidate")
-        { q=`Select user_id,first_name,skills,password from personal_details,candidate where username='${inp.id}'\
-        and candidate_id=user_id ;`}
+        { q=`Select user_id,first_name,array_agg(skills) as skills,password from personal_details,candidate_skill where username='${inp.id}'\
+        and candidate_id=user_id group by(user_id,first_name,password);`}
         else
          q=`Select user_id,first_name,company,password from personal_details,recruiter where username='${inp.id}'\
         and recruiter_id=user_id ;`
@@ -325,6 +354,10 @@ async function deletefromtable(req,res){
         }
         else{
             await client.connect()
+            .then(()=>{
+                q=`delete from job_skill where job_id=${req.params.jid} and owner_id=${req.params.id};`
+                return client.query(q)
+            })
             .then(()=>{
                 q=`delete from jobs where job_id=${req.params.jid} and owner_id=${req.params.id};`
                 return client.query(q)
