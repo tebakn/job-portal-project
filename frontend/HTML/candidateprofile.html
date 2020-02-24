@@ -14,7 +14,7 @@
 <body class="firstclass">
   <!-- <div style="margin-top: 10%;"> -->
 
-    <div class="ui grid " >
+    <div class="ui grid " id="scrollgrid">
       <div class="row ">
         <div class="ui inverted meduim menu fluid">
           <a class=" item">
@@ -43,12 +43,12 @@
         <div class="column two wide computer only " >
     <div class="ui sticky fixed secondary vertical pointing menu" id="sidemenu" >
       <!-- <div class ="ui sticky"> -->
-      <a class="active item" href="#workhist"><i class="briefcase icon"></i>Work History</a>
-      <a class="item" href="#skills">Skills</a>
-      <a class="item" href="#certification">Certifications</a>
-      <a class="item" href="#projects">Projects</a>
-      <a class="item" href="#achievements">Other Achievements</a>
-      <a class="item"><i class="graduation cap icon"></i>Education</a>
+      <a class="active item" href="#workhist" name="sidebarlink"><i class="briefcase icon"></i>Work History</a>
+      <a class="item" href="#skills" name="sidebarlink">Skills</a>
+      <a class="item" href="#certification" name="sidebarlink">Certifications</a>
+      <a class="item" href="#projects" name="sidebarlink">Projects</a>
+      <a class="item" href="#achievements" name="sidebarlink">Other Achievements</a>
+      <a class="item" name="sidebarlink"><i class="graduation cap icon"></i>Education</a>
     <!-- </div> -->
   </div>
 </div>
@@ -57,7 +57,7 @@
   <div  class="sixteen wide mobile twelve wide computer column">
     <div class="ui container " id ="details">
       
-        <div class="ui  grid" >
+        <div class="ui  grid"  >
             <div class="sixteen wide mobile twelve wide computer column fluid" >
               <div class="row " id="workhist">
               <span class="ui horizontal divider "><h2 class="ui header">Work History</h2></span>
@@ -258,20 +258,35 @@
             </div>  
           </div>
             </div>    
-      
-
-    </div>
-    </div>
-  </div >  
-  </div>
-  <!-- </div> -->
-  <!-- </div> -->
-
 </body>
 <!-- <script src="/home/local/INTERNAL/naman.t/job-portal/semantic/dist/semantic.min.js"></script> -->
-<!-- <script>
-card=document.getElementById("basic_details")
-card.style.height="10%"
-</script> -->
+<script>
+  function yoyo(){
+    console.log(document)
+    console.log("aa",document.getElementById("scrollgrid").scrollTop)
+
+  }
+  window.onscroll=yoyo
+  document.body.addEventListener("",(e)=>{
+    console.log(document.body.scrollTop)  
+  })
+  rows=Array.from(document.getElementsByClassName("row"))
+    rows.forEach((element)=>{
+      element.addEventListener("scroll",(event)=>{
+      console.log(event.path[0].scrollTop())
+    })})
+  sbarlinks=Array.from(document.getElementsByName("sidebarlink"))
+  sbarlinks.forEach(element => {
+    element.addEventListener("click",(event)=>{
+      sidelinks=Array.from(document.getElementsByName("sidebarlink"))
+      sidelinks.forEach((e)=>{
+        e.className="item"})
+      event.path[0].className="active item"
+    })
+    
+  });
+
+
+</script>
 
 </html>
