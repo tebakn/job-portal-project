@@ -261,19 +261,22 @@ async function apply(req,res){
     }
     jid=req.params.ojid.split(":")[0]
     oid=req.params.ojid.split(":")[1]
+    console.log(jid,oid,req.params.ojid)
     client=sup.dbcon()
     await client.connect()
     .then(()=>console.log("WOHOO"))
     .then(()=>{
-        let q=`Insert into applications (job_id,candidate_id,owner_id) values (${jid},${req.params.id},${oid});`;
+        let q=`Insert into applications (job_id,candidate_id,owner_id,created_at,updated_at) \
+        values ('${jid}','${req.params.id}','${oid}',(select now()),(select now()));`;
+        //console.log(q)
         return client.query(q);
     })
     .then((result)=>{
         res.status(201).end(`created new application for (${req.params.ojid},${req.params.id})`)
     })
     .catch((e)=>{
-        // console.log(e.message.match('constraint "applications_job_id_fkey"'))
-        if (e.message.match('constraint "applications_job_id_fkey"')!==null)
+        // console.log(e)
+        if (e.message.match('constraint "applications_job_id_fkey"')!==null || e.message.match('invalid input syntax for type integer')!==null)
             res.status(400).end("incorrect job id")
         else if(e.message.match('constraint "applications_pkey"')!==null)
             res.status(400).end("application exists")
@@ -335,8 +338,8 @@ async function deletefromtable(req,res){
     client=sup.dbcon()
     try{
         if (req.path.split('/')[1]=="candidate" && req.path.split('/')[3]=="applications"){
-            jid=req.params.jid.split(':')[0]
-            oid=req.params.jid.split(':')[1]
+            jid=req.params.ojid.split(':')[0]
+            oid=req.params.ojid.split(':')[1]
 
         await client.connect()
         .then(()=>{
@@ -345,9 +348,9 @@ async function deletefromtable(req,res){
         })
         .then((results)=>{
             if(results.rowCount===0)
-                res.status(200).end(`Application ${req.params.jid} ,${req.params.id} does not exists`)
+                res.status(200).end(`Application ${req.params.ojid} ,${req.params.id} does not exists`)
             else
-                res.status(200).end(`Successfully deleted ${req.params.jid} ,${req.params.id} from applications`)
+                res.status(200).end(`Successfully deleted ${req.params.ojid} ,${req.params.id} from applications`)
         })
         .catch((e)=>{throw e;})
         .finally(()=>{client.end()})
@@ -375,6 +378,8 @@ async function deletefromtable(req,res){
         catch(e){
             if(e.message.match('constraint "applications_job_id_fkey"')!==null)
                 res.status(400).end("Delete applications first")
+            else if(e.message.match('invalid input syntax for type integer')!==null)
+                res.status(400).end(`Application ${req.params.ojid} ,${req.params.id} does not exists`)
             else
             throw e;
         }

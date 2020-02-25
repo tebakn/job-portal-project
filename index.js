@@ -36,7 +36,7 @@ app.get("/recruiter/:id/applications/",api.getapplications)
 
 
 app.post("/candidate/:id/jobs/:ojid",api.apply)
-app.delete("/candidate/:id/applications/:jid",api.delete)
+app.delete("/candidate/:id/applications/:ojid",api.delete)
 
 
 app.get("/recruiter/:id/candidates/",api.getcandidates)

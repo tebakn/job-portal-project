@@ -74,6 +74,7 @@ function filterdata(filter){
         try{
         filtered_result= gotdata.data.filter((values)=>{
             values.$sortby_attrval=0
+            
             let ret= Object.keys(filter).reduce((tot,filtkey)=>{
             compval=comparator(values,filter,filtkey)
             values.$sortby_attrval+=compval
