@@ -35,9 +35,26 @@ function validatelogin(loginobj){
         skill: joi.array().items(joi.string())
     };
     return joi.validate(loginobj,schema);
-} 
+}
+
+function validateNewUser(user){
+
+    const schema ={
+        first_name: joi.string().regex(/\D/).min(5).required(),
+        last_name:  joi.string().regex(/\D/).min(5).required(),
+        email: joi.string().email({ minDomainAtoms: 2 }).required(),
+        gender: joi.string().regex(/^[Fem,M]ale$/).required(),
+        phone_number: joi.string().regex(/^\+\d{1,3} \d{3} \d{3} \d{4}$/),
+        password: joi.string().required(),
+        username: joi.string().required(),
+        education: joi.string().regex(/\D+/),
+        skills: joi.array().items(joi.string().regex(/\D+/)),
+        company: joi.string().regex(/\D+/)
+    };
+    return joi.validate(user,schema);
+}
+
 function validatejob(jobs){
-    console.log(jobs)
     const schema ={
         job_id: joi.number().integer().required(),
         name: joi.string().regex(/\D/).min(5).required(),
@@ -53,5 +70,6 @@ function validatejob(jobs){
 }
 module.exports={
     validateGotData,
+    validateNewUser,
     validatelogin,
     validateJob:validatejob}
