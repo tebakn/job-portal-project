@@ -1,0 +1,174 @@
+
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <title>Job List</title>
+    <style>
+
+        </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css" type="text/css">
+    <link rel="stylesheet" href="../CSS/job_list.css" type="text/css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+</head>
+
+<body class="firstclass">
+  <!-- <div style="margin-top: 10%;"> -->
+
+    <div class="ui centered grid " id="scrollgrid">
+        <div class="row">
+      <div class="column fourteen wide">
+        <div class="ui top sticky fluid huge tabular menu my-menu">
+          <a class=" item">
+            <img class="ui small image" 
+            src="data:image/png;base64,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"
+             alt="Talview LOGO">
+          </a>
+          <div class="right menu">
+            <div class="item">
+                <div class="ui primary right floated button ">Sign in</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+ 
+    <div class="row my-row" >
+        <div class="column fourteen wide">
+            <div class="people_image">
+                <img src="small banner.jpg" height="200px" width="1400px">
+                <div class="ui menu my-centered my-margin" id="center_search">
+                    <div class="ui large icon input" id="searchjobs">
+                        <input class="" type="text" placeholder="Search jobs" id="searchinput">
+                        <i class="search icon"></i>
+                    </div>
+                    <div class="ui large icon input">
+                        <input class="" type="text" placeholder="Location">
+                        <i class="location arrow icon"></i>
+                    </div>
+                    <button  class="ui primary large button" onclick="search()">Search</button>
+                    <div class="results"></div>
+                </div>
+                <div class="my-centered"><h2><font color="white">Join Us In Disrupting Recruitment!</font></h2></div>
+                </div>
+        </div>
+        </div>
+            <div class="column fourteen wide"  >
+                <br><br><br>
+                <div class="ui centered grid">
+
+
+                    <div class="five wide column">
+                        <b>Refine Your Search</b>
+                        <div class="ui vertical fluid menu ">
+                            <a class="item" onclick="expslider()">
+                              Experience
+                              <i class="dropdown icon"></i>
+                            </a>
+                            <div class="item" id="exp_menu">
+                              <label for="vol"><em>Set Experience</em><br>
+                              <input type="range" id="vol" name="vol" min="0" max="50"></label>
+                              <div id="show_vol"></div>
+                            </div>
+                            <a class="item">
+                              Category
+                              <i class="dropdown icon"></i>
+                            </a>
+                            <a class="item">
+                              Employment
+                              <i class="dropdown icon"></i>
+                            </a>
+                          </div>
+            </div>
+            <div class="column nine wide" id="feed" name="feed">
+                <b><span>Showing 1-5 of 271 jobs</span><span class="my-span">Sort By <a>Most Recent<i class="chevron down icon"></i>
+                </a></span></b>
+                <div id="feed_div"></div>
+                
+    
+
+
+
+            </div>
+            </div>
+            </div>
+
+      </div>
+      
+ 
+
+</body>
+<!-- <script src="/home/local/INTERNAL/naman.t/job-portal/semantic/dist/semantic.min.js"></script> -->
+<script>
+  document.getElementById("exp_menu").style.display = "none";
+function expslider(){
+    var x = document.getElementById("exp_menu");
+    if (x.style.display === "none") {
+      x.style.display = "block";
+    } else {
+      x.style.display = "none";
+    }
+  }
+document.getElementById('vol').onchange = function(){
+    let answer = document.getElementById('vol').value;
+    document.getElementById('show_vol').innerHTML = answer;
+}
+res=fetch("http://localhost:8082/joblist").then(async(data)=>{
+      await data.json().then((value)=>insertintofeed(value))
+    }).catch((e)=>{
+      console.log(e)
+        })
+  async function search(){
+    val=document.getElementById("searchinput").value
+    val=val.trim()
+    console.log(val)
+    res=await fetch("http://localhost:8082/joblist?"+val).then(async(data)=>{
+      await data.json().then((value)=>insertintofeed(value))
+    }).catch((e)=>{
+      console.log(e)
+        })
+      }
+  function insertintofeed(filtered_results){
+    
+    feed=document.getElementById("feed_div")
+    feed.innerHTML=''
+    filtered_results.forEach((filtered_result,index) => {
+      newdiv=document.createElement("div")
+    newdiv.id="job"+filtered_result.id
+    newdiv.className="ui fluid card"
+    newdiv.innerHTML=`                
+                  <div class="content">
+                    <i class="right floated alternate share icon"></i>
+                    <div class="header">${filtered_result.title} </div>
+                    <div class="meta">
+                      <span class="item">
+                        <i class="location arrow icon"></i>${filtered_result.location}
+                      </span> <span class="ui divider"> /</span><span class="item">
+                        <i class="suitcase icon"></i>${filtered_result.category}
+                      </span> <span class="divider">/</span> <span class="item">
+                        <i class="outline clock arrow icon"></i>>${filtered_result.experience}
+                      </span>
+                    </div>
+                    <div class="description">
+                      <p>${filtered_result.description}</p>
+                    </div>
+                  </div>
+                  <div class="extra content">
+                    <span class="right floated">
+                      Posted on: ${filtered_result.posted_on_date} |${filtered_result.posted_on_time}
+
+                    </span>
+                  </div>
+                `
+                feed.appendChild(newdiv)
+    });
+  }
+
+
+</script>
+
+</html>

@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const api=require('./apifunction');
 const authapi=require('./api/authentication');
 const jobsapi=require('./api/jobs');
-const candrapi=require('./api/candidateandrecruiter');
+const userapi=require('./api/candidateandrecruiter');
 const appapi=require('./api/applications');
 let app = express();
 app.use(bodyParser.json())
@@ -14,7 +14,8 @@ app.use('/semantic',express.static('semantic'))
 
 
 app.get("/",(req,res)=>{
-    res.status(200).sendFile("/home/local/INTERNAL/naman.t/job-portal/frontend/HTML/candidateprofile.html")
+    res.status(200).sendFile("/home/local/INTERNAL/naman.t/job-portal/frontend/HTML/job_List_With_Image.html")
+
 })
 app.get("/toogleadm",authapi.tooglelogin)
 
@@ -22,14 +23,14 @@ app.get("/logout",authapi.logout)
 
 
 app.post("/candidate",(req,res)=>{
-    if (Object.keys(req.body).length > 2)
-        candrapi.newuser(req,res)
+    if (Object.keys(req.body).includes('first_name'))
+        userapi.newuser(req,res)
     else
         authapi.login(req,res)
     })
 app.post("/recruiter",(req,res)=>{
-    if (Object.keys(req.body).length > 2)
-        candrapi.newuser(req,res)
+    if (Object.keys(req.body).includes('first_name'))
+        userapi.newuser(req,res)
     else
         authapi.login(req,res)
     })
@@ -53,7 +54,7 @@ app.post("/candidate/:id/jobs/:ojid",appapi.apply)
 app.delete("/candidate/:id/applications/:ojid",api.delete)
 
 
-app.get("/recruiter/:id/candidates/",candrapi.getcandidates)
+app.get("/recruiter/:id/candidates/",userapi.getcandidates)
 
 app.patch("/recruiter/:id/applications/:jid/:cid",appapi.updatestatus)
 
