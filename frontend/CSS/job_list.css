@@ -1,0 +1,43 @@
+
+        .ui.top.sticky.fluid.huge.tabular.menu.my-menu{
+            position: fixed;
+            max-width: 1400px;
+            background-color: ivory;
+            }
+            .img-height{
+            height: 200px;
+            }
+            .my-centered {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+      body{
+          background-color: #F3F3F3;
+      }
+      .column.fourteen.wide{
+        background-color:#ECF1F5;
+      }
+            .my-span{
+                margin-left: 450px;
+            }
+            .ui.menu.my-centered.my-margin{
+                position: absolute;
+                margin-top: 100px;
+                z-index: 10;
+    
+            }
+            .row.my-row{
+                margin-top: 60px;
+            }
+            /* .column.fourteen.wide.bg-image{
+                background-image: url("https://files.slack.com/files-pri/T4WTVRR6Y-FUMGVMMUG/small_banner.jpg");
+                background-size: cover;
+    
+            }; */
+            .menu-container{
+                position: absolute;
+          margin-top: 200px;
+          width: auto;
+            }

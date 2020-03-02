@@ -21,10 +21,11 @@
     "@hapi/joi-date": "^2.0.1",
     "chai": "^4.2.0",
     "chai-http": "^4.3.0",
+    "express": "^4.17.1",
     "joi": "^14.3.1",
     "jquery": "^3.4.1",
     "mocha": "^7.0.1",
-    "semantic-ui": "^2.4.2"
+    "winston": "^3.2.1"
   },
   "devDependencies": {
     "cors": "^2.8.5",

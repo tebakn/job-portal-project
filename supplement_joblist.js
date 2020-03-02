@@ -21,7 +21,6 @@ async function setDatainfo(obj){
 }
 
 function filterdata(filter){
-    console.log(filter)
     page=filter.$paginate_page || 1
     limit=filter.$paginate_limit || 5
      delete filter.$paginate_page
@@ -40,58 +39,69 @@ function filterdata(filter){
         return ret; 
     })
     pag= paginated(filtered_result.sort((a,b)=>b.$sortby_attrval - a.$sortby_attrval),page,limit);
+
     return pag
     }
     catch(e){throw e;}
 }
 function comparator(dbrowobj,filterobj,filterkey){
     keyarr=filterkey.split('_')
-
-    if (keyarr.length===1){
-        if (dbrowobj[filterkey.toLowerCase()]!==undefined)
-            return dbrowobj[filterkey.toLowerCase()]===filterobj[filterkey]
-        else
-            throw  {name:'key error', message:`Key ${filterkey} is not present`}
-    }
     last=keyarr.pop()
-
-    let compute=arethmatic_comparator(last);
-    if(compute===undefined){
-        if (dbrowobj[filterkey.toLowerCase()] instanceof Array || filterobj[filterkey] instanceof Array){
-            compute=logic_comparator
-        }
-        else
-            compute=(a,b)=>{return Number(a)===Number(b)}
-        keyarr.push(last)
-    }
     filterdbkey=keyarr.join('_')
-    if (dbrowobj[filterdbkey.toLowerCase()]!==undefined)
+
+    if (dbrowobj[filterkey.toLowerCase()]!==undefined){
+        if (dbrowobj[filterkey.toLowerCase()] instanceof Array || filterobj[filterkey] instanceof Array){
+            //logger.info("Intersection on key "+filterkey )
+            return intersection_comparator(dbrowobj[filterkey.toLowerCase()],filterobj[filterkey])
+        }
+        else{
+           // logger.info("Equal_to on key "+filterkey )
+            return dbrowobj[filterkey.toLowerCase()]===filterobj[filterkey]
+        }
+    }
+
+    let compute=last_comparator(last);
+
+    if (dbrowobj[filterdbkey.toLowerCase()]!==undefined && compute!==undefined){
+        if(last==="$includes"){
+            //logger.info("Intersection on key "+filterkey)
+            return compute(dbrowobj[filterdbkey.toLowerCase()].split(' '),filterobj[filterkey].split(' '))
+        }
+        else{
+            //logger.info("Comparison on key"+ filterkey)
             return compute(dbrowobj[filterdbkey.toLowerCase()],filterobj[filterkey])
-        else
-        throw  {name:'key error', message:`Key ${filterdbkey} is not present`}
+        }
+        }
+    else
+        throw  {name:'key error', message:`Key ${filterkey} is not valid`}
 
 }
-function arethmatic_comparator(key_last){
-    if (key_last.toLowerCase()==="isgreater")
+function last_comparator(key_last){
+    if (key_last.toLowerCase()==="$isgreater")
     return (a,b)=>{return Number(a) >= Number(b)}
 
-else if(key_last.toLowerCase()==="isless")
-    return (a,b)=>{return Number(a)<= Number(b)}
+    else if(key_last.toLowerCase()==="$isless")
+        return (a,b)=>{return Number(a)<= Number(b)}
 
-else if (key_last.toLowerCase()==="isrange")
-    return (a,b)=>{return Number(b[0])<=Number(a) && Number(a)<=Number(b[1])}
-else
-    return undefined
+    else if (key_last.toLowerCase()==="$isrange")
+        return (a,b)=>{return Number(b[0])<=Number(a) && Number(a)<=Number(b[1])}
+
+    else if (key_last.toLowerCase()==="$includes")
+        return intersection_comparator
+    else
+        return undefined
 }
-function  logic_comparator(db_attribute,filter_attribute){
-    db_attribute=db_attribute[0]?db_attribute:[db_attribute]
-    filter_attribute=filter_attribute[0]?filter_attribute:[filter_attribute]
+function  intersection_comparator(db_attribute,filter_attribute){
+    db_attribute=db_attribute instanceof Array?db_attribute:[db_attribute]
+    filter_attribute=filter_attribute instanceof Array?filter_attribute:[filter_attribute]
     
     let common=db_attribute.filter((value)=>filter_attribute.includes(value))
+//    console.log(common)
     return common.length
 }
 function paginated(result,page,limit){
 
+    page=parseInt(page)
     start_index=(page-1)*limit
     end_index=page*limit
     ret_obj={}
@@ -105,7 +115,7 @@ function paginated(result,page,limit){
     }
     if(start_index>0)
     {
-        ret_obj.next={
+        ret_obj.prev={
             page: page-1,
             limit: limit
         }
