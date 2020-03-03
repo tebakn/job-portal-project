@@ -5,10 +5,21 @@ const authapi=require('./api/authentication');
 const jobsapi=require('./api/jobs');
 const userapi=require('./api/candidateandrecruiter');
 const appapi=require('./api/applications');
-let app = express();
+const cors = require('cors')
+
+const corsOptions = {
+    origin: 'https://editor.swagger.io'
+  }
+  
+  let app = express();
+  app.use(cors(corsOptions))
+
+
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use('/front',express.static('frontend'))
+app.use('/swagger',express.static('api/swagger/'))
+app.use('/swag',express.static('swagger.json'))
 app.use('/semantic',express.static('semantic'))
 
 
@@ -23,12 +34,15 @@ app.get("/logout",authapi.logout)
 
 
 app.post("/candidate",(req,res)=>{
+    console.log(req.body)
+
     if (Object.keys(req.body).includes('first_name'))
         userapi.newuser(req,res)
     else
         authapi.login(req,res)
     })
 app.post("/recruiter",(req,res)=>{
+    console.log(req.body)
     if (Object.keys(req.body).includes('first_name'))
         userapi.newuser(req,res)
     else

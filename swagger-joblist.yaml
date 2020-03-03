@@ -1,0 +1,172 @@
+openapi: 3.0.0
+info:
+  description: defaultDescription
+  version: '0.1'
+  title: defaultTitle
+servers: 
+  - url: http://localhost:8082/
+paths:
+  /joblist:
+    get:
+      parameters:
+            - in: query
+              name: id
+              schema:
+                $ref: '#/components/schemas/filter_param'
+            - in: query
+              name: id_$isgreater
+              schema:
+                $ref: '#/components/schemas/filter_param_greaterorless'            
+            - in: query
+              name: id_$isless
+              schema:
+                $ref: '#/components/schemas/filter_param_greaterorless'
+            - in: query
+              name: id_$includes
+              schema:
+                $ref: '#/components/schemas/filter_param_includes'              
+            - in: query
+              name: id_$isrange
+              schema:
+                $ref: '#/components/schemas/filter_param_range'
+                
+            - in: query
+              name: location
+              schema:
+                $ref: '#/components/schemas/filter_param'
+            - in: query
+              name: location_$isgreater
+              schema:
+                $ref: '#/components/schemas/filter_param_greaterorless'            
+            - in: query
+              name: location_$isless
+              schema:
+                $ref: '#/components/schemas/filter_param_greaterorless'
+            - in: query
+              name: location_$includes
+              schema:
+                $ref: '#/components/schemas/filter_param_includes'              
+            - in: query
+              name: location_$isrange
+              schema:
+                $ref: '#/components/schemas/filter_param_range'
+                
+            - in: query
+              name: title
+              schema:
+                $ref: '#/components/schemas/filter_param'
+            - in: query
+              name: title_$isgreater
+              schema:
+                $ref: '#/components/schemas/filter_param_greaterorless'            
+            - in: query
+              name: title_$isless
+              schema:
+                $ref: '#/components/schemas/filter_param_greaterorless'
+            - in: query
+              name: title_$includes
+              schema:
+                $ref: '#/components/schemas/filter_param_includes'              
+            - in: query
+              name: title_$isrange
+              schema:
+                $ref: '#/components/schemas/filter_param_range'
+                
+            - in: query
+              name: experience
+              schema:
+                $ref: '#/components/schemas/filter_param'
+            - in: query
+              name: experience_$isgreater
+              schema:
+                $ref: '#/components/schemas/filter_param_greaterorless'            
+            - in: query
+              name: experience_$isless
+              schema:
+                $ref: '#/components/schemas/filter_param_greaterorless'
+            - in: query
+              name: experience_$includes
+              schema:
+                $ref: '#/components/schemas/filter_param_includes'              
+            - in: query
+              name: experience_$isrange
+              schema:
+                $ref: '#/components/schemas/filter_param_range'
+            
+            
+              
+                
+      responses:
+        200:
+          description: "Return JSON object with filtered and paginated results sorted on the basis of relevancy"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Model0'
+        400:
+          description: "Return error if key not found in data base object"
+          content:
+            text/plain:
+              schema: 
+                type: string
+            
+components:
+  schemas:
+    filter_param:
+      properties:
+        type:
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
+      description: "Parameter to be exactly matched with attribute or array to be used for intersection with attribute USE ONLY 1 of available filter_param types"
+    filter_param_greaterorless:
+      properties:
+        type:
+          type: number
+      description: "Parameter to set max or min of the attribute USE ONLY 1 of available filter_param types"
+        
+    filter_param_range:
+      properties:
+        type: 
+          type: array
+          items:
+            type: number
+          minItems: 2 
+          maxItems: 2
+      description: "Parameter to set min to max range of the attribute USE ONLY 1 of available filter_param types"
+
+        
+    filter_param_includes:
+      properties:
+        type: 
+          type: string  
+      description: "To explicitly call intersection of string by splitting the attribute and parameter USE ONLY 1 of available filter_param types"
+
+        
+    Array:
+      properties:
+        id:
+          type: integer
+          format: number
+        title:
+          type: string
+        location:
+          type: string
+        category:
+          type: string
+        experience:
+          type: integer
+          format: number
+        description:
+          type: string
+        posted_on_date:
+          type: string
+        posted_on_time:
+          type: string
+    Model0:
+      type: array
+      items:
+        $ref: '#/components/schemas/Array' 
+        

@@ -18,7 +18,7 @@ let app = express();
 app.use(cors(corsOptions))
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
-// app.use('/front',express.static('frontend'))
+app.use('/front',express.static('frontend'))
 
 
 

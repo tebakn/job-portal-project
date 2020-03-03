@@ -25,11 +25,11 @@
     "joi": "^14.3.1",
     "jquery": "^3.4.1",
     "mocha": "^7.0.1",
+    "swagger-ui": "^3.25.0",
     "winston": "^3.2.1"
   },
   "devDependencies": {
     "cors": "^2.8.5",
-    "isomorphic-unfetch": "^3.0.0",
-    "swagger-ui": "^3.25.0"
+    "isomorphic-unfetch": "^3.0.0"
   }
 }

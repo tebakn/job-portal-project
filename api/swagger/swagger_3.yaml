@@ -1,0 +1,230 @@
+openapi: 3.0.1
+info:
+  title: Job Portal
+  version: 1.0.0
+servers:
+- url: http://localhost:8081/
+tags:
+- name: candidate
+  description: API for candidate
+  externalDocs:
+    description: Find out more
+    url: http://swagger.io
+- name: recruiter
+  description: API for recruiter
+- name: ADMIN
+  description: Admin to access all candidates and recrutier
+  externalDocs:
+    description: Find out more about our store
+    url: http://swagger.io
+paths:
+  /candidate:
+    post:
+      tags:
+      - candidate
+      summary: login or add new candidate
+      operationId: LoginorAddcandidate
+      requestBody:
+        description: object of user to be logged in or added
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/candidate'
+        required: false
+      responses:
+        200:
+          description: Successfully login or add candidate
+          content: {}
+        400:
+          description: Invalid input
+          content: {}
+        401:
+          description: invalid id token
+          content: {}
+      x-codegen-request-body-name: body
+  /candidate/{id}:
+    get:
+      tags:
+      - candidate
+      summary: Display candidate details for given id
+      operationId: candidateprofile
+      parameters:
+      - name: id
+        in: path
+        description: Id token of logged in user
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: Return Details about candidate
+          content: {}
+        401:
+          description: invalid id token
+          content: {}
+  /candidate/{id}/jobs:
+    get:
+      tags:
+      - candidate
+      summary: Display open jobs published by recruiter
+      operationId: jobsforcandidate
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: Return jobs
+          content: {}
+        401:
+          description: invalid id token
+          content: {}
+  /recruiter:
+    post:
+      tags:
+      - recruiter
+      summary: login or add new recruiter
+      operationId: LoginorAddrecruiter
+      requestBody:
+        description: object of user to be logged in or added
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/recruiter'
+        required: false
+      responses:
+        200:
+          description: Successfully login or add recruiter
+          content: {}
+        400:
+          description: Invalid input
+          content: {}
+        401:
+          description: invalid id token
+          content: 
+            text/plain:
+              schema:
+                type: string
+      x-codegen-request-body-name: body
+  /recruiter/{id}:
+    get:
+      tags:
+      - recruiter
+      summary: Display recruiter details for given id
+      operationId: recruiterprofile
+      parameters:
+      - name: id
+        in: path
+        description: Id token of logged in user
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: Return Details about recruiter
+          content: {}
+        401:
+          description: invalid id token
+          content: {}
+  /recruiter/{id}/jobs:
+    get:
+      tags:
+      - recruiter
+      summary: Display jobs published by recruiter for given id
+      operationId: jobsbyrecruiter
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: Return jobs
+          content: {}
+        401:
+          description: invalid id token
+          content: {}
+    post:
+      tags:
+      - recruiter
+      summary: Post a job
+      operationId: insertrecruiter
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/jobs'
+        required: false
+      responses:
+        200:
+          description: Return jobs
+          content: {}
+        400:
+          description: invalid job parameter
+          content: {}
+        401:
+          description: invalid id token
+          content: {}
+      x-codegen-request-body-name: body
+components:
+  schemas:
+    jobs:
+      type: object
+      properties:
+        jobid:
+          type: number
+        name:
+          type: string
+        salary:
+          type: number
+        department:
+          type: string
+        availabilty:
+          type: number
+        joining_date:
+          type: number
+          format: date
+        skills:
+          type: array
+          items:
+            type: string
+        priority:
+          type: array
+          items:
+            type: number
+    details:
+      required:
+      - password
+      - username
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+        first_name:
+          type: string
+        last_name:
+          type: string
+        gender:
+          type: string
+          enum:
+          - Male
+          - Female
+        phone_number:
+          type: number
+    candidate:
+      allOf:
+      - $ref: '#/components/schemas/details'
+    recruiter:
+      allOf:
+      - $ref: '#/components/schemas/details'
