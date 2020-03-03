@@ -1,0 +1,100 @@
+{
+    "swagger": "2.0",
+    "info": {
+      "version": "1.0.0",
+      "title": "Job Portal"
+    },
+    "host": "localhost:8081",
+    "basePath": "/",
+    "tags": [
+      {
+        "name": "candidate",
+        "description": "API for candidate",
+        "externalDocs": {
+          "description": "Find out more",
+          "url": "http://swagger.io"
+        }
+      },
+      {
+        "name": "recruiter",
+        "description": "API for recruiter"
+      },
+      {
+        "name": "ADMIN",
+        "description": "Admin to access all candidates and recrutier",
+        "externalDocs": {
+          "description": "Find out more about our store",
+          "url": "http://swagger.io"
+        }
+      }
+    ],
+    "schemes": [
+      "http"
+    ],
+    "paths": {
+      "/candidate": {
+        "post": {
+          "tags": [
+            "candidate"
+          ],
+          "summary": "login or add new candidate",
+          "description": "",
+          "operationId": "LoginorAddcandidate",
+          "consumes": [
+            "application/json"
+          ],
+          "produces": [
+            "application/text"
+          ],
+          "parameters": [
+            {
+              "in": "body",
+              "name": "body",
+              "description": "object of user to be logged in or added",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/candidate"
+              }
+            }
+          ],
+          "responses": {
+            "405": {
+              "description": "Invalid input"
+            }
+          }
+        }
+      }
+    },
+    "definitions": {
+      "candidate": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "first_name": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          },
+          "gender": {
+            "type": "string",
+            "enum": [
+              "Male",
+              "Female"
+            ]
+          },
+          "phone_number": {
+            "type": "integer"
+          }
+        },
+        "xml": {
+          "name": "candidate"
+        }
+      }
+    }
+  }

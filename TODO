@@ -1,5 +1,4 @@
-skills
-ADD candidate/recruiter
-testcases
+skills :- sorting , priority
+testcases for newportal :- for newuser creation 
 logg
 reduce API

@@ -64,18 +64,21 @@ describe('ADM', () => {
                       console.log(delappflag)
 
               done();
-            });})
+            });
+          });
 
-        it('delete job with code 200 if exists', (done) => {
+      console.log(delappflag)
+        it('delete application code 200 if exists ', (done) => {
+
           chai.request(server)
-              .delete('/candidate/2/applications/56')
+              .delete('/candidate/2/applications/56:119')
               .end((err, res) => {
                     res.should.have.status(200);
                           console.log(res.text)
                 done();
               });
         });
-      
+
 
 
 
@@ -91,7 +94,8 @@ describe('ADM', () => {
                 done();
               });
         });
-          it('delete job with code 200 if exists', (done) => {
+          it('delete job if exists with code 200', (done) => {
+
             chai.request(server)
                 .delete('/recruiter/119/jobs/56')
                 .end((err, res) => {
@@ -100,7 +104,6 @@ describe('ADM', () => {
                   done();
                 });
           });
-        
 
 
             it('Display applications with code 200', (done) => {
@@ -136,8 +139,8 @@ describe('login recruiter', () => {
             .post('/recruiter')
             .type('JSON')
             .send({
-                'username':'dstiti',
-                "password":"S17diGUY"
+                'username':'gglanz3a',
+                "password":"z2tSMCID82XW"
             })
             .end((req,res)=>{
               res.should.have.status(200)
@@ -154,7 +157,7 @@ describe('login recruiter', () => {
             .end((err, res) => {
                   res.should.have.status(200);
                         console.log(res.text)
-                  res.text.should.be.equal('Welcome user {"id":119,"name":"Danielle"}');
+                  res.text.should.be.equal('Welcome user {"id":119,"company":"Jaloo","name":"Goober"}');
               done();
             });
       });
@@ -172,7 +175,7 @@ describe('login recruiter', () => {
       
   });
   describe('post job', () => {
-      it('return error with validation', (done) => {
+      it('return error with validation 1', (done) => {
         chai.request(server)
             .post('/recruiter/119/jobs/')
             .type('JSON')
@@ -183,6 +186,95 @@ describe('login recruiter', () => {
               'availability': '10',
               'joining_date': '2020/03/01',
               'skills': 'JAVA',
+              'priority': 5,
+              'isopen': 'true'
+            })
+            .end((err, res) => {
+                  res.should.have.status(400);
+                        console.log(res.text)
+                  res.text.should.be.a('string');
+                  
+              done();
+            });})
+
+      it('return error with validation 2', (done) => {
+            chai.request(server)
+            .post('/recruiter/119/jobs/')
+            .type('JSON')
+            .send({
+              'job_id': '56',
+              'name': 'firstjob',
+              'department': 'it',
+              'availability': '10',
+              'joining_date': '2020/03/01',
+              'skills': 'JAVA',
+              'priority': 5,
+              'isopen': 'true'
+            })
+            .end((err, res) => {
+                  res.should.have.status(400);
+                        console.log(res.text)
+                  res.text.should.be.a('string');
+                  
+              done();
+            });})
+
+      it('return error with validation 3', (done) => {
+            chai.request(server)
+            .post('/recruiter/119/jobs/')
+            .type('JSON')
+            .send({
+              'job_id': '56',
+              'name': 'firstjob',
+              'department': 'it',
+              'availability': '10',
+              'joining_date': '2020/03/01',
+              'skills': ['JAVA','Python'],
+              'priority': 5,
+              'isopen': 'true'
+            })
+            .end((err, res) => {
+                  res.should.have.status(400);
+                        console.log(res.text)
+                  res.text.should.be.a('string');
+                  
+              done();
+            });})
+
+      it('return error with validation 4', (done) => {
+            chai.request(server)
+            .post('/recruiter/119/jobs/')
+            .type('JSON')
+            .send({
+              'job_id': '56',
+              'name': 'firstjob',
+              'department': 'it',
+              'availability': '10',
+              'joining_date': '2020/03/01',
+              'skills': ['JAVA','python'],
+              'priority': [5],
+              'isopen': 'true'
+            })
+            .end((err, res) => {
+                  res.should.have.status(400);
+                        console.log(res.text)
+                  res.text.should.be.a('string');
+                  
+              done();
+            });})
+
+      it('Transaction rolls back as only 1 table gets updated', (done) => {
+        chai.request(server)
+            .post('/recruiter/119/jobs/')
+            .type('JSON')
+            .send({
+              'job_id': '56',
+              'name': 'firstjob',
+              'department': 'it',
+              'availability': '10',
+              'joining_date': '2020/03/01',
+              'skills': ['JAVA','JAVA'],
+              'priority': [5,3],
               'isopen': 'true'
             })
             .end((err, res) => {
@@ -192,7 +284,10 @@ describe('login recruiter', () => {
                   
               done();
             });
-      });
+          })
+
+
+
       it('return job id inserted', (done) => {
           chai.request(server)
               .post('/recruiter/119/jobs/')
@@ -203,7 +298,8 @@ describe('login recruiter', () => {
                 'department': 'it',
                 'availability': '10',
                 'joining_date': '2020/03/01',
-                'skills': 'JAVA',
+                'skills': ['JAVA'],
+                'priority':[3],
                 'isopen': 'true'
               })
               .end((err, res) => {
@@ -224,7 +320,8 @@ describe('login recruiter', () => {
                 'department': 'it',
                 'availability': '10',
                 'joining_date': '2020/03/01',
-                'skills': 'JAVA',
+                'skills': ['JAVA'],
+                'priority': [4],
                 'isopen': 'true'
               })
               .end((err, res) => {
@@ -235,8 +332,8 @@ describe('login recruiter', () => {
                 done();
               });
               });
-  })
-  describe('logout', () => {
+
+    describe('logout', () => {
     it('logout', (done) => {
       chai.request(server)
           .get('/logout')
@@ -246,7 +343,7 @@ describe('login recruiter', () => {
           });
     });
 });
-})
+})})
 
 
 
@@ -260,8 +357,8 @@ before("return user id with code 200",(done) => {
           .post('/candidate')
           .type('JSON')
           .send({
-              'username':'btuckey1',
-              "password":"QdQKDtEeFo"
+              'username':'rbrinicombe1',
+              "password":"wiBBQmrYY"
           })
           .end((req,res)=>{
             res.should.have.status(200)
@@ -277,7 +374,7 @@ describe('/GET details of user', () => {
           .end((err, res) => {
                 res.should.have.status(200);
                       console.log(res.text)
-                res.text.should.be.equal('Welcome user {"id":2,"name":"Bartolemo"}');
+                res.text.should.be.equal('Welcome user {"id":2,"skill":["Aspen HYSYS","XSS","Light Rail","DHTML","Summation iBlaze"],"name":"Reese"}');
                 
             done();
           });
@@ -298,18 +395,18 @@ describe('/GET details of user', () => {
 describe('apply for job', () => {
     it('return candidate id and job id inserted', (done) => {
       chai.request(server)
-          .post('/candidate/2/jobs/56')
+          .post('/candidate/2/jobs/56:119')
           .end((err, res) => {
                 res.should.have.status(201);
                       console.log(res.text)
-                res.text.should.be.equal('created new application for (56,2)');
+                res.text.should.be.equal('created new application for (56:119,2)');
                 
             done();
           });
     });
     it('error as the application is already inserted with status 400', (done) => {
         chai.request(server)
-            .post('/candidate/2/jobs/56')
+            .post('/candidate/2/jobs/56:119')
             .end((err, res) => {
                   res.should.have.status(400);
                   res.text.should.be.equal('application exists')
@@ -319,7 +416,7 @@ describe('apply for job', () => {
       });
     it('error as the job id is wrong  status 400', (done) => {
         chai.request(server)
-            .post('/candidate/2/jobs/000')
+            .post('/candidate/2/jobs/000:11')
             .end((err, res) => {
                   res.should.have.status(400);
                   res.text.should.be.equal('incorrect job id')                  

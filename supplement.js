@@ -21,7 +21,6 @@ async function setLogininfo(obj){
     let failflag=false;
     out=await validate.validatelogin(obj)
     .catch((e)=>{
-        res.status(500).end(e.message)
         failflag=true;
         })
     if (failflag)
@@ -32,7 +31,6 @@ async function setDatainfo(obj){
     let failflag=false;
     out=await validate.validateGotData(obj)
     .catch((e)=>{
-        res.status(500).end(e.message)
         failflag=true;
         })
     if (failflag)
@@ -45,7 +43,7 @@ function dbcon(){
         password:"1234",
         host:"desk-naman",
         port:5432,
-        database:"portal"
+        database:"newportal"
     }))
 }
 function validuser(id,user){
@@ -65,7 +63,7 @@ function validuser(id,user){
     return true
 }
 function filterdata(filter){
-    // console.log(filter)
+    console.log(filter)
     page=filter.$paginate_page || 1
     limit=filter.$paginate_limit || 5
      delete filter.$paginate_page
@@ -75,13 +73,15 @@ function filterdata(filter){
 
         try{
         filtered_result= gotdata.data.filter((values)=>{
-        
-        let ret= Object.keys(filter).reduce((tot,filtkey)=>{
-
-            return (tot && comparator(values,filter,filtkey))},true)
+            values.$sortby_attrval=0
+            
+            let ret= Object.keys(filter).reduce((tot,filtkey)=>{
+            compval=comparator(values,filter,filtkey)
+            values.$sortby_attrval+=compval
+            return (tot && compval)},true)
         return ret; 
     })
-    return paginated(filtered_result,page,limit);
+    return paginated(filtered_result.sort((a,b)=>b.$sortby_attrval - a.$sortby_attrval),page,limit);
     }
     catch(e){throw e;}
 }
@@ -94,30 +94,42 @@ function comparator(dbrowobj,filterobj,filterkey){
         else
             throw  {name:'key error', message:`Key ${filterkey} is not present`}
     }
-
     last=keyarr.pop()
-    let compute;
 
-    if (last.toLowerCase()==="isgreater")
-        compute=(a,b)=>{return Number(a) >= Number(b)}
-
-    else if(last.toLowerCase()==="isless")
-        compute=(a,b)=>{return Number(a)<= Number(b)}
-
-    else if (last.toLowerCase()==="isrange")
-        compute=(a,b)=>{return Number(b[0])<=Number(a) && Number(a)<=Number(b[1])}
-
-    else
-        {compute=(a,b)=>{return Number(a)===Number(b)}
+    let compute=arethmatic_comparator(last);
+    if(compute===undefined){
+        if (dbrowobj[filterkey.toLowerCase()] instanceof Array || filterobj[filterkey] instanceof Array){
+            compute=logic_comparator
+        }
+        else
+            compute=(a,b)=>{return Number(a)===Number(b)}
         keyarr.push(last)
     }
     filterdbkey=keyarr.join('_')
-
     if (dbrowobj[filterdbkey.toLowerCase()]!==undefined)
             return compute(dbrowobj[filterdbkey.toLowerCase()],filterobj[filterkey])
         else
         throw  {name:'key error', message:`Key ${filterdbkey} is not present`}
 
+}
+function arethmatic_comparator(key_last){
+    if (key_last.toLowerCase()==="isgreater")
+    return (a,b)=>{return Number(a) >= Number(b)}
+
+else if(key_last.toLowerCase()==="isless")
+    return (a,b)=>{return Number(a)<= Number(b)}
+
+else if (key_last.toLowerCase()==="isrange")
+    return (a,b)=>{return Number(b[0])<=Number(a) && Number(a)<=Number(b[1])}
+else
+    return undefined
+}
+function  logic_comparator(db_attribute,filter_attribute){
+    db_attribute=db_attribute[0]?db_attribute:[db_attribute]
+    filter_attribute=filter_attribute[0]?filter_attribute:[filter_attribute]
+    
+    let common=db_attribute.filter((value)=>filter_attribute.includes(value))
+    return common.length
 }
 function paginated(result,page,limit){
 
